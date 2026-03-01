@@ -4,6 +4,8 @@ import openai from "../configs/gemini.js"
 import axios from "axios"
 import { v2 as cloudinary } from "cloudinary"
 import { configDotenv } from "dotenv"
+import fs from "fs"
+import {PDFParse}  from "pdf-parse"
 configDotenv()
 
 export const GenerateArticle = async (req, res) => {
@@ -91,7 +93,6 @@ export const GenerateBlogTitle = async (req, res) => {
 
         return res.status(200).json({ success: true, content })
 
-
     } catch (error) {
         console.log(error)
         res.status(500).json({ success: false, message: error.message })
@@ -128,21 +129,120 @@ export const GenerateImage = async (req, res) => {
 
             const query = await pgsql`INSERT INTO creations (user_id, prompt, content, type, publish) VALUES (${userId}, ${prompt}, ${secure_url}, 'image', ${publish ?? false})`
 
-            if (plan !== "premium") {
-                await clerkClient.users.updateUserMetadata(userId, {
-                    privateMetadata: {
-                        free_usage: free_usage + 1
-                    }
-                })
-            }
+            
 
             return res.status(200).json({ success: true, content: secure_url })
         } else {
             return res.json({ sucess: false, message: "Api key not provided" })
         }
 
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ success: false, message: error.message })
+    }
+}
+export const RemoveImageBackground = async (req, res) => {
+    try {
+        const { userId } = req.auth()
+        const { image } = req.file
+        const plan = req.plan
 
 
+        if (!image) {
+            return res.status(400).json({ success: false, message: "Need image to generate background" })
+        }
+
+
+
+        const { secure_url } = await cloudinary.uploader.upload(image.path, {
+            transformation: [
+                {
+                    effect: "background_removal",
+                    background_removal: "remove_the_background"
+                }
+            ]
+        })
+
+        const query = await pgsql`INSERT INTO creations (user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${secure_url}, 'image')`
+
+
+        return res.status(200).json({ success: true, content: secure_url })
+
+
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ success: false, message: error.message })
+    }
+}
+export const RemoveImageObject = async (req, res) => {
+    try {
+        const { userId } = req.auth()
+        const { object } = req.body
+        const { image } = req.file
+        const plan = req.plan
+
+
+        if (!image || !object) {
+            return res.status(400).json({ success: false, message: "Please upload 1 image and specify the object" })
+        }
+
+
+        const { public_id } = await cloudinary.uploader.upload(image.path)
+
+        const image_url = cloudinary.url(public_id, {
+            transformation: [
+                { effect: `gen_remove:${object}` }
+            ],
+            resource_type: "image"
+        })
+
+
+        const query = await pgsql`INSERT INTO creations (user_id, prompt, content, type) VALUES (${userId}, 'Remove ${object} from image ', ${image_url}, 'image')`
+
+
+        return res.status(200).json({ success: true, content: image_url })
+
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ success: false, message: error.message })
+    }
+}
+export const ResumeReview = async (req, res) => {
+    try {
+        const { userId } = req.auth()
+        const { resume } = req.file
+        const plan = req.plan
+
+
+        if (!resume) {
+            return res.status(400).json({ success: false, message: "Please upload resume to review" })
+        }
+
+        if (resume.size > 5 * 1024 * 1024) {
+            return res.json({ success: false, message: "Resume pdf should not be greater than 5mb" })
+        }
+
+        const dataBuffer = fs.readFileSync(resume.path)
+        const pdfData = await PDFParse(dataBuffer)
+
+        const prompt = `Review the following resume and provide constructive feedback on its strengths, weaknesses, and areas for improvement. Resume Content:\n\n${pdfData.text}`
+
+        const response = await openai.chat.completions.create({
+            model: "gemini-3-flash-preview",
+            messages: [{
+                role: "user", content: prompt,
+            }
+            ],
+            temperature: 0.7,
+            max_tokens: 1000
+        })
+
+        const content = response.choices[0].message.content
+
+        const query = await pgsql`INSERT INTO creations (user_id, prompt, content, type) VALUES (${userId}, 'Review the uploaded resume', ${content}, 'resume-review')`
+
+        return res.status(200).json({ success: true, content })
 
 
 

@@ -5,6 +5,7 @@ import pgsql from "./configs/db.js"
 import { clerkMiddleware, requireAuth } from "@clerk/express"
 import aiRouter from "./routes/aiRoutes.js"
 import connectCloudinary from "./configs/cloudinary.js"
+import userRouter from "./routes/userRoutes.js"
 dotenv.config()
 
 const app = express()
@@ -18,9 +19,8 @@ app.use(clerkMiddleware())
 app.use(requireAuth())
 
 app.use("/api/ai", aiRouter)
-app.use("/", (req, res) => {
-    res.json({ success: true, message: "Server is healthy" })
-})
+app.use("/api/user", userRouter)
+
 
 
 
