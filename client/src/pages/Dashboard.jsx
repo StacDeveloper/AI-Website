@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { dummyCreationData } from '../../public/assets'
 import { Sparkles } from 'lucide-react'
 import { Protect, useAuth } from '@clerk/clerk-react'
 import CreationItem from '../components/CreationItem'

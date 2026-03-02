@@ -10,7 +10,7 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3000
-const domain = process.env.DOMAIN
+
 await connectCloudinary()
 // middlewares
 app.use(express.json())
@@ -26,4 +26,4 @@ app.use("/",(req,res)=>{
 
 
 
-app.listen(PORT, () => console.log(`Server running on ${domain}:${PORT}`))
+app.listen(PORT, () => console.log(`Server running on ${PORT}`))
