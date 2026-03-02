@@ -10,7 +10,7 @@ dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT || 3000
-
+const domain = process.env.DOMAIN
 await connectCloudinary()
 // middlewares
 app.use(express.json())
@@ -20,8 +20,10 @@ app.use(requireAuth())
 
 app.use("/api/ai", aiRouter)
 app.use("/api/user", userRouter)
+app.use("/",(req,res)=>{
+    res.json({success:true, message:"Server is healthy"})
+})
 
 
 
-
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`))
+app.listen(PORT, () => console.log(`Server running on ${domain}:${PORT}`))
