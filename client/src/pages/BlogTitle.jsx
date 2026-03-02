@@ -1,5 +1,9 @@
 import React, { useState } from 'react'
 import { Edit, Hash, Sparkles } from 'lucide-react'
+import toast from 'react-hot-toast'
+import Markdown from 'react-markdown'
+import { useAuth } from '@clerk/clerk-react'
+import api from '../lib/axios'
 
 const BlogTitle = () => {
 
@@ -7,9 +11,33 @@ const BlogTitle = () => {
 
   const [SelectedCateogory, SetSelectedCategory] = useState(blogCategories[0])
   const [input, SetInput] = useState("")
+  const [loading, SetLoading] = useState(false)
+  const [content, SetContent] = useState("")
+  const { getToken } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const token = await getToken()
+    try {
+      SetLoading(true)
+      const prompt = `Generate a blog title for keyword ${input} in the category ${SelectedCateogory}`
+
+      const { data } = await api.post("/api/ai/generate-blog", { prompt }, { headers: { Authorization: `Bearer ${token}` } })
+
+      if (data.success) {
+        SetContent(data.content)
+      } else {
+        toast.error(data.error)
+      }
+
+
+    } catch (error) {
+      console.log(error)
+      toast.error(error)
+    }
+    finally {
+      SetLoading(false)
+    }
   }
 
 
@@ -45,7 +73,7 @@ const BlogTitle = () => {
         </div>
         <br />
         <button className='w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#C341F6] to-[#8E37EB] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer'>
-          <Hash className='w-5' />
+          {loading ? <span className='w-4 h-4 rounded-full my-1 border-2 border-t-transparent animate-spin'></span> : <Hash className='w-5' />}
           Generate Title
         </button>
       </form>
@@ -56,13 +84,20 @@ const BlogTitle = () => {
           <h1 className='text-xl font-semibold'>Generated Titles</h1>
         </div>
 
-
-        <div className='flex-1 flex justify-center items-center'>
+        {!content ? (<div className='flex-1 flex justify-center items-center'>
           <div className='text-sm flex flex-col items-center gap-5 text-gray-400'>
             <Hash className='w-9 h-9' />
             <p>Enter a topic and click "Generated title" to get started</p>
           </div>
-        </div>
+        </div>) : (
+          <div className='mt-3 h-full overflow-y-scroll text-sm text-slate-600'>
+            <div className='reset-tw'>
+              <Markdown>{content}</Markdown>
+            </div>
+          </div>
+        )}
+
+
       </div>
     </div>
   )

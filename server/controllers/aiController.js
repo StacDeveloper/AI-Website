@@ -5,7 +5,7 @@ import axios from "axios"
 import { v2 as cloudinary } from "cloudinary"
 import { configDotenv } from "dotenv"
 import fs from "fs"
-import {PDFParse}  from "pdf-parse"
+import { PDFParse } from "pdf-parse"
 configDotenv()
 
 export const GenerateArticle = async (req, res) => {
@@ -76,7 +76,7 @@ export const GenerateBlogTitle = async (req, res) => {
             }
             ],
             temperature: 0.7,
-            max_tokens: 100
+            max_tokens: 500
         })
 
         const content = response.choices[0].message.content
@@ -115,13 +115,13 @@ export const GenerateImage = async (req, res) => {
         const apiKey = process.env.CLIPDROP_API_KEY
 
         if (apiKey) {
-            const { response } = await axios.post('https://clipdrop-api.co/text-to-image/v1', formData, {
+            const response = await axios.post('https://clipdrop-api.co/text-to-image/v1', formData, {
                 headers: {
                     'x-api-key': apiKey,
                 },
                 responseType: "arraybuffer"
             })
-            const base64image = `data:image/png;base64,${Buffer.from(response, "binary").toString("base64")}`
+            const base64image = `data:image/png;base64,${Buffer.from(response.data, "binary").toString("base64")}`
 
             const { secure_url } = await cloudinary.uploader.upload(base64image)
 
@@ -129,7 +129,7 @@ export const GenerateImage = async (req, res) => {
 
             const query = await pgsql`INSERT INTO creations (user_id, prompt, content, type, publish) VALUES (${userId}, ${prompt}, ${secure_url}, 'image', ${publish ?? false})`
 
-            
+
 
             return res.status(200).json({ success: true, content: secure_url })
         } else {
@@ -144,9 +144,9 @@ export const GenerateImage = async (req, res) => {
 export const RemoveImageBackground = async (req, res) => {
     try {
         const { userId } = req.auth()
-        const { image } = req.file
+        const image = req.file
         const plan = req.plan
-
+        console.log(image)
 
         if (!image) {
             return res.status(400).json({ success: false, message: "Need image to generate background" })
@@ -163,7 +163,7 @@ export const RemoveImageBackground = async (req, res) => {
             ]
         })
 
-        const query = await pgsql`INSERT INTO creations (user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${secure_url}, 'image')`
+        const query = await pgsql`INSERT INTO creations (user_id, prompt, content, type) VALUES (${userId}, 'Remove image from background', ${secure_url}, 'image')`
 
 
         return res.status(200).json({ success: true, content: secure_url })
@@ -179,9 +179,9 @@ export const RemoveImageObject = async (req, res) => {
     try {
         const { userId } = req.auth()
         const { object } = req.body
-        const { image } = req.file
+        const image = req.file
         const plan = req.plan
-
+        console.log(object)
 
         if (!image || !object) {
             return res.status(400).json({ success: false, message: "Please upload 1 image and specify the object" })
@@ -197,8 +197,10 @@ export const RemoveImageObject = async (req, res) => {
             resource_type: "image"
         })
 
+        const insert = `Remove ${object} from image`
+        console.log(typeof insert)
 
-        const query = await pgsql`INSERT INTO creations (user_id, prompt, content, type) VALUES (${userId}, 'Remove ${object} from image ', ${image_url}, 'image')`
+        const query = await pgsql`INSERT INTO creations (user_id, prompt, content, type) VALUES (${userId}, ${insert}, ${image_url}, 'image')`
 
 
         return res.status(200).json({ success: true, content: image_url })
@@ -211,7 +213,7 @@ export const RemoveImageObject = async (req, res) => {
 export const ResumeReview = async (req, res) => {
     try {
         const { userId } = req.auth()
-        const { resume } = req.file
+        const resume = req.file
         const plan = req.plan
 
 
@@ -224,7 +226,7 @@ export const ResumeReview = async (req, res) => {
         }
 
         const dataBuffer = fs.readFileSync(resume.path)
-        const pdfData = await PDFParse(dataBuffer)
+        const pdfData = await new PDFParse(dataBuffer)
 
         const prompt = `Review the following resume and provide constructive feedback on its strengths, weaknesses, and areas for improvement. Resume Content:\n\n${pdfData.text}`
 

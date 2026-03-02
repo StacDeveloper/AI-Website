@@ -1,13 +1,42 @@
 import { Scissors, Sparkles } from 'lucide-react'
 import React, { useState } from 'react'
-
+import api from '../lib/axios'
+import toast from 'react-hot-toast'
+import { useAuth } from '@clerk/clerk-react'
 const RemoveObject = () => {
 
   const [input, SetInput] = useState("")
   const [object, SetObject] = useState("")
+  const [loading, Setloading] = useState(false)
+  const [content, Setcontent] = useState("")
+  const { getToken } = useAuth()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    try {
+      Setloading(true)
+      const token = await getToken()
+
+      if (object.split(" ").length > 1) {
+        return toast.error("Please enter only 1 object name")
+      }
+      const formData = new FormData()
+      formData.append('image', input)
+      formData.append('object', object)
+      const { data } = await api.post("/api/ai/remove-image-object", formData, { headers: { Authorization: `Bearer ${token}` } })
+      if (data.success) {
+        Setcontent(data.content)
+        toast.success(`Remove ${object} from image`)
+      }
+      else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error(error)
+    } finally {
+      Setloading(false)
+    }
   }
 
   return (
@@ -38,8 +67,8 @@ const RemoveObject = () => {
         />
 
 
-        <button className='w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#417DF6] to-[#8E37EB] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer'>
-          <Scissors className='w-5' />
+        <button disabled={loading} className='w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#417DF6] to-[#8E37EB] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer'>
+          {loading ? <span className='w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin'></span> : <Scissors className='w-5' />}
           Remove Object
         </button>
       </form>
@@ -50,13 +79,18 @@ const RemoveObject = () => {
           <h1 className='text-xl font-semibold'>Processed Image</h1>
         </div>
 
-
-        <div className='flex-1 flex justify-center items-center'>
+        {!content ? (<div className='flex-1 flex justify-center items-center'>
           <div className='text-sm flex flex-col items-center gap-5 text-gray-400'>
             <Scissors className='w-9 h-9' />
             <p>Upload an image and click "Remove Object" to get started </p>
           </div>
-        </div>
+        </div>) : (
+          <div>
+            <img src={content} alt="image" className='mt-3 w-full h-full' />
+          </div>
+        )}
+
+
       </div>
     </div>
   )

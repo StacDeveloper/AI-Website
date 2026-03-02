@@ -31,6 +31,7 @@ export const ToggleLikeCreation = async (req, res) => {
     try {
         const { userId } = req.auth()
         const { id } = req.body
+        console.log(id)
         const [creation] = await pgsql`SELECT * FROM creations WHERE id = ${id}`
 
         if (!creation) {
@@ -43,14 +44,14 @@ export const ToggleLikeCreation = async (req, res) => {
 
         if (currentLikes.includes(userIdStr)) {
             updatedLikes = currentLikes.filter((user) => user !== userIdStr)
-            message = "Creation Unliked"
+            message = "Unliked Creation Successfully"
         } else {
             updatedLikes = [...currentLikes, userIdStr]
-            message = "Creation Liked"
+            message = "Liked Creation Successfully"
         }
 
-        const forMattedArray = `{${updatedLikes.json(',')}}`
-        const updatedCreation = await pgsql`UPDATE creation SET likes = ${forMattedArray}::text[] WHERE id = ${id};`
+        const forMattedArray = `{${updatedLikes.join(',')}}`
+        const updatedCreation = await pgsql`UPDATE creations SET likes = ${forMattedArray}::text[] WHERE id = ${id};`
 
         return res.status(200).json({ success: true, message })
 

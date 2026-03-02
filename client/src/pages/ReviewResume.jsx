@@ -1,12 +1,36 @@
 import { Eraser, File, FileText, Sparkles } from 'lucide-react'
 import React, { useState } from 'react'
+import api from '../lib/axios'
+import toast from 'react-hot-toast'
+import { useAuth } from '@clerk/clerk-react'
+import Markdown from 'react-markdown'
 
 const ReviewResume = () => {
 
   const [input, SetInput] = useState("")
-
+  const [loading, Setloading] = useState(false)
+  const [content, Setcontent] = useState("")
+  const { getToken } = useAuth()
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const token = await getToken()
+    try {
+      Setloading(true)
+      const formData = new FormData()
+      formData.append('resume', input)
+      const { data } = await api.post("/api/ai/resume-review", formData, { headers: { Authorization: `Bearer ${token}` } })
+      if (data.success) {
+        Setcontent(data.content)
+        toast.success("Resume reviewed successfully")
+      } else {
+        toast.error(data.message)
+      }
+    } catch (error) {
+      console.log(error)
+      toast.error(error)
+    } finally {
+      Setloading(false)
+    }
   }
 
   return (
@@ -20,8 +44,8 @@ const ReviewResume = () => {
         <p className='mt-6 text-sm font-semibold'>Upload Resume</p>
 
         <input
-          onChange={(e) => SetInput(e.target.files[0])} accept='image/*'
-          type="application/pdf"
+          onChange={(e) => SetInput(e.target.files[0])} accept='application/pdf'
+          type="file"
           className='w-full p-2 px-3 mt-2 outline-none text-sm rounded-md border border-gray-300 text-gray-600'
           placeholder='The future of artificial intelligence is...'
           required
@@ -31,7 +55,7 @@ const ReviewResume = () => {
 
 
         <button className='w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#00DA83] to-[#009BB3] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer'>
-          <File className='w-5' />
+          {loading ? <span className='w-4 h-4 my-1 rounded-full border-2 border-t-transparent animate-spin'></span> : <File className='w-5' />}
           Review Resume
         </button>
       </form>
@@ -43,12 +67,19 @@ const ReviewResume = () => {
         </div>
 
 
-        <div className='flex-1 flex justify-center items-center'>
+        {!content ? (<div className='flex-1 flex justify-center items-center'>
           <div className='text-sm flex flex-col items-center gap-5 text-gray-400'>
             <FileText className='w-9 h-9' />
             <p>Upload a resume and click "Review Resume" to get started</p>
           </div>
-        </div>
+        </div>) : (
+          <div className='mt-3 h-full overflow-y-scroll text-sm text-slate-600'>
+            <div className='reset-tw'>
+              <Markdown>{content}</Markdown>
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   )
