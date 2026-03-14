@@ -372,13 +372,13 @@ const classifyQuestions = async (state) => {
     try {
         const chain = PromptTemplate.fromTemplate(`
                     Classify this question into ONE of these categories:
-                - skill_check     (asking about skills or technologies)
-                - job_fit         (asking if suitable for a role)
-                - improvement     (asking what to improve or is missing)
-                - salary          (asking about salary or market value)
-                - general         (anything else)
+                    - skill_check     (asking about skills or technologies)
+                    - job_fit         (asking if suitable for a role)
+                    - improvement     (asking what to improve or is missing)
+                    - salary          (asking about salary or market value)
+                    - general         (anything else)
                     Reply with ONLY the category word, nothing else.
-                Question: {question}
+                    Question: {question}
                  `).pipe(model).pipe(parser)
 
         const category = await chain.invoke({ question: state.question })

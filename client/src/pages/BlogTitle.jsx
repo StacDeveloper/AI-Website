@@ -4,6 +4,7 @@ import toast from 'react-hot-toast'
 import Markdown from 'react-markdown'
 import { useAuth } from '@clerk/clerk-react'
 import api from '../lib/axios'
+import { useMutation } from '@tanstack/react-query'
 
 const BlogTitle = () => {
 
@@ -11,33 +12,31 @@ const BlogTitle = () => {
 
   const [SelectedCateogory, SetSelectedCategory] = useState(blogCategories[0])
   const [input, SetInput] = useState("")
-  const [loading, SetLoading] = useState(false)
   const [content, SetContent] = useState("")
   const { getToken } = useAuth()
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const token = await getToken()
-    try {
-      SetLoading(true)
+  const { mutate: generateTitle, isPending } = useMutation({
+    mutationFn: async ({ input, SelectedCateogory }) => {
+      const token = await getToken()
       const prompt = `Generate a blog title for keyword ${input} in the category ${SelectedCateogory}`
-
-      const { data } = await api.post("/api/ai/generate-blog", { prompt }, { headers: { Authorization: `Bearer ${token}` } })
-
-      if (data.success) {
-        SetContent(data.content)
-      } else {
-        toast.error(data.error)
-      }
-
-
-    } catch (error) {
-      console.log(error)
+      const { data } = await api.post("/api/ai/generate-blog", { prompt }, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      if (!data.success) throw new Error(data.error)
+      return data.content
+    },
+    onSuccess: (content) => {
+      SetContent(content)
+    },
+    onError: (error) => {
       toast.error(error)
     }
-    finally {
-      SetLoading(false)
-    }
+  })
+
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    generateTitle({ input, SelectedCateogory })
   }
 
 
@@ -73,7 +72,7 @@ const BlogTitle = () => {
         </div>
         <br />
         <button className='w-full flex justify-center items-center gap-2 bg-gradient-to-r from-[#C341F6] to-[#8E37EB] text-white px-4 py-2 mt-6 text-sm rounded-lg cursor-pointer'>
-          {loading ? <span className='w-4 h-4 rounded-full my-1 border-2 border-t-transparent animate-spin'></span> : <Hash className='w-5' />}
+          {isPending ? <span className='w-4 h-4 rounded-full my-1 border-2 border-t-transparent animate-spin'></span> : <Hash className='w-5' />}
           Generate Title
         </button>
       </form>

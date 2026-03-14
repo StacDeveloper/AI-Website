@@ -11,12 +11,23 @@ import RemoveObject from './pages/RemoveObject'
 import ReviewResume from './pages/ReviewResume'
 import Community from './pages/Community'
 import { Toaster } from 'react-hot-toast'
+import { useAuth } from '@clerk/clerk-react'
+import { useEffect } from 'react'
 
 const App = () => {
 
+  const { getToken } = useAuth()
+  const token = async () => {
+    const t = await getToken()
+    return t
+  }
+
+  useEffect(() => {
+    token().then((t)=>console.log(t))
+  }, [])
   return (
     <div>
-      <Toaster/>
+      <Toaster />
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/ai' element={<Layout />}>

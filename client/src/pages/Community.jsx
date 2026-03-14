@@ -3,43 +3,43 @@ import { useAuth, useUser } from "@clerk/clerk-react"
 import { Heart } from 'lucide-react'
 import api from '../lib/axios'
 import toast from 'react-hot-toast'
+import { QueryClient, useQuery } from "@tanstack/react-query"
 const Community = () => {
-
-  const [creation, SetCreation] = useState([])
   const { user } = useUser()
-  const [loading, SetLoading] = useState(false)
   const { getToken } = useAuth()
+
 
   const fetchCreation = async () => {
     try {
-      SetLoading(true)
       const token = await getToken()
       const { data } = await api.get("/api/user/get-published-creations", { headers: { Authorization: `Bearer ${token}` } })
       console.log(data)
-      if (data.success) {
-        SetCreation(data.creations)
-      }
-      else {
-        toast.error(data.message)
-      }
+      if (data.success) return data.creations
+      throw new Error(data.message)
     }
 
     catch (error) {
       console.log(error)
       toast.error(error.message)
-    } finally {
-      SetLoading(false)
     }
   }
+
+  const { data: creations = [], isLoading, refetch } = useQuery({
+    queryKey: ['get-creations'],
+    queryFn: fetchCreation,
+    throwOnError: (error) => toast.error(error)
+  })
+
+
+
 
   const imageToggleLike = async (id) => {
     try {
       const token = await getToken()
       const { data } = await api.post("/api/user/toggle-like-creations", { id }, { headers: { Authorization: `Bearer ${token}` } })
-      console.log(data)
       if (data.success) {
         toast.success(data.message)
-        fetchCreation()
+        refetch()
       } else {
         toast.error(data.message)
       }
@@ -49,17 +49,12 @@ const Community = () => {
     }
   }
 
-  useEffect(() => {
-    if (user) {
-      fetchCreation()
-    }
-  }, [user])
 
-  return !loading ? (
+  return !isLoading ? (
     <div className='flex-1 h-full flex flex-col gap-4 p-6'>
       Creations
       <div className='bg-white h-full w-full rounded-xl overflow-y-scroll'>
-        {creation.map((creat, index) => (
+        {creations.map((creat, index) => (
           <div key={index} className='relative group inline-block pl-3 pt-3 w-full sm:max-w-1/2 lg:max-w-1/3'>
             <img src={creat.content} alt="" className='w-full h-full object-cover rounded-lg' />
             <div className='absolute bottom-0 top-0 right-0 left-3 flex gap-2 items-end justify-end group-hover:justify-between p-3 group-hover:bg-gradient-to-b from-transparent to-black/80 text-white rounded-lg'>
