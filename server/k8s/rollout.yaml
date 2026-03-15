@@ -1,0 +1,133 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: server
+  namespace: server-backend
+  labels:
+    app: server
+spec:
+  selector:
+    matchLabels:
+      app: server
+  replicas: 2
+  strategy:
+    canary:
+      steps:
+        - setWeight: 10
+        - pause: { duration: 1m }
+        - setWeight: 30
+        - pause: { duration: 1m }
+        - setWeight: 60
+        - pause: { duration: 1m }
+
+      # analysis rollback via prometheus
+      analysis:
+        startingStep: 2
+        templates:
+          - templateName: server-success-rate
+        args:
+          - name: server
+            value: server-backend
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: server
+          image: ai-saas:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+              name: http
+          resources:
+            requests:
+              cpu: 250m
+              memory: 252Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          lifecycle:
+            preStop:
+              exec:
+                command: ["bin/sh", "-c", "sleep 15"]
+          env:
+            - name: "TZ"
+              value: "Asia/Shanghai"
+            - name: PORT
+              valueFrom:
+                secretKeyRef:
+                  name: server-secret
+                  key: PORT
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: server-secret
+                  key: DATABASE_URL
+            - name: CLERK_PUBLISHABLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: server-secret
+                  key: CLERK_PUBLISHABLE_KEY
+            - name: CLERK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: server-secret
+                  key: CLERK_SECRET_KEY
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: server-secret
+                  key: GEMINI_API_KEY
+            - name: CLIPDROP_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: server-secret
+                  key: CLIPDROP_API_KEY
+            - name: CLOUDINARY_CLOUD_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: server-secret
+                  key: CLOUDINARY_CLOUD_NAME
+            - name: CLOUDINARY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: server-secret
+                  key: CLOUDINARY_API_KEY
+            - name: CLOUDINARY_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: server-secret
+                  key: CLOUDINARY_API_SECRET
+
+          # ports:
+          #   - containerPort: 80
+          #     name: myjob
+          # volumeMounts:
+          #   - name: localtime
+          #     mountPath: /etc/localtime
+      # volumes:
+      #   - name: localtime
+      #     hostPath:
+      #       path: /usr/share/zoneinfo/Asia/Taipei
+      # restartPolicy: Always
+---
