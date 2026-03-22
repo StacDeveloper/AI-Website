@@ -73,10 +73,10 @@ const fetchContext = async (state) => {
         const getChunks = ["job_fit", "improvement"]
 
 
-        const chunkLimit = getChunks.includes(state.question) ? 8 : 4
+        const chunkLimit = getChunks.includes(state.questionType) ? 8 : 4
         const chunks = await pgsql`SELECT content FROM resume_chunks WHERE user_id = ${state.userId} ORDER BY <=> ${JSON.stringify(questionVector)}::vector LIMIT ${chunkLimit}`
 
-        const context = chunks.map(c => c.content).join('\n\n' || "No resume found")
+        const context = chunks.map(c => c.content).join('\n\n') || "No Resume Found"
 
         return { ...state, context }
 
@@ -85,7 +85,7 @@ const fetchContext = async (state) => {
     }
 }
 
-const answerSkillCheck = async (state) => {
+const answerSkillCheck = async (state,res) => {
     try {
         const chain = PromptTemplate.fromTemplate(`
              Based on this resume content, answer the skill question clearly. List specific technologies and rate proficiency if possible. Resume: {context} Question: {question}
@@ -177,7 +177,7 @@ workFlow.setEntryPoint("classify")
 workFlow.addEdge("classify", "fetchContext")
 
 workFlow.addConditionalEdges("fetchContext", (state) => {
-    routes = {
+    const routes = {
         skill_check: "skillCheck",
         jobfit: "jobFit",
         improvement: "improvement",
