@@ -165,15 +165,15 @@ jobs:
           args: --severity-threshold=high
 
 
-  sonarqube:
-    name: Sonarqube Analysis
+  sonarcloud:
+    name: sonarcloud Analysis
     runs-on: ubuntu-latest
     needs: unit-tests
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 #shallow clones disabled - Sonarqube needs full history for blame
+          fetch-depth: 0 #shallow clones disabled - sonarcloud needs full history for blame
       
       - name: Setup Node.js 
         uses: actions/setup-node@v4
@@ -193,14 +193,14 @@ jobs:
           name: coverage-report
           path: coverage/
 
-      # Sonarqube scanner analysis
+      # sonarcloud scanner analysis
       # #   - Bugs & code smells
       #   - Security vulnerabilities (SAST)
       #   - Code duplication
       #   - Test coverage (from lcov.info)
       #   - Technical debt
-      - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@master
+      - name: sonarcloud Scan
+        uses: SonarSource/sonarcloud-scan-action@master
         env:
           SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
           SONAR_HOST_URL: ${{secrets.SONAR_HOST_URL}}
@@ -215,10 +215,10 @@ jobs:
             -Dsonar.coverage.exclusions=**/*.test.js,**/*.spec.js,**/node_modules/**
             -Dsonar.cpd.exclusions=**/*.test.js
     
-    # Quality Gate - blocks pipeline if SonarQube score fails
+    # Quality Gate - blocks pipeline if sonarcloud score fails
     # e.g. coverage dropped, new bugs introduced, security issues found
-      - name: SonarQube Quality Gate Check
-        uses: SonarSource/sonarqube-quality-gate-action@master
+      - name: sonarcloud Quality Gate Check
+        uses: SonarSource/sonarcloud-quality-gate-action@master
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
@@ -228,7 +228,7 @@ jobs:
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
-    needs: [lint, unit-tests, integration-tests, security, sonarqube]
+    needs: [lint, unit-tests, integration-tests, secuity, sonarcloud]
     outputs:
       image-uri: ${{steps.build-push.outputs.image-uri}}
     steps:
@@ -356,7 +356,7 @@ jobs:
   notify:
     name: Notify on Failure
     runs-on: ubuntu-latest
-    needs: [lint, unit-tests, integration-tests, security, build, image-scan, push-to-ecr, sonarqube]
+    needs: [lint, unit-tests, integration-tests, security, build, image-scan, push-to-ecr, sonarcloud]
     if: failure()
     steps:
       - name: Notify Slack on failure
