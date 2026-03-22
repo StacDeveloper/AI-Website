@@ -11,19 +11,25 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3000
 
+
+app.use("/health", (req, res) => {
+    res.json({ success: true, message: "Server is healthy" })
+})
 await connectCloudinary()
 // middlewares
 app.use(express.json())
 app.use(cors())
 app.use(clerkMiddleware())
-app.use(requireAuth())
 
-app.use("/api/ai", aiRouter)
-app.use("/api/user", userRouter)
-app.use("/",(req,res)=>{
-    res.json({success:true, message:"Server is healthy"})
+
+app.use("/api/ai", requireAuth(), aiRouter)
+app.use("/api/user", requireAuth(), userRouter)
+app.use("/", (req, res) => {
+    res.json({ success: true, message: "Server is healthy" })
 })
 
 
+
+// langchain @langchain/core @langchain/google-genai @langchain/langgraph @langchain/openai @langchain/textsplitters
 
 app.listen(PORT, () => console.log(`Server running on ${PORT}`))
