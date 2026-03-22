@@ -9,13 +9,12 @@ on:
 env:
   AWS_REGION: eu-north-1
   ECR_REPOSITORY: server-backend/ai-website
-  IMAGE_TAG: ${{ github.sha }}
+  IMAGE_TAG: ${{github.sha}}
   # EKS_CLUSTER_NAME: server-backend
 
 jobs:
-  # ─────────────────────────────────────────
-  # 1. SETUP
-  # ─────────────────────────────────────────
+  # Install and Cache Dependencies
+
   setup:
     name: Setup Environment
     runs-on: ubuntu-latest
@@ -28,21 +27,19 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
-
+      
       - name: Install Dependencies
         run: npm ci
 
       - name: Cache node_modules
         uses: actions/cache@v3
-        with:
+        with: 
           path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          key: ${{runner.os}}-node-${{hashFiles('package-lock.json')}}
           restore-keys: |
-            ${{ runner.os }}-node
+            ${{runner.os}}-node
 
-  # ─────────────────────────────────────────
-  # 2. LINT
-  # ─────────────────────────────────────────
+  # Lint and Format Check
   lint:
     name: Lint and Format
     runs-on: ubuntu-latest
@@ -55,31 +52,30 @@ jobs:
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-
-      - name: Run ESLint
+          key: ${{runner.os}}-node-${{hashFiles('package-lock.json')}}
+      
+      - name: Run ESlint
         run: npm run lint
-
+      
       - name: Run Prettier check
         run: npm run format:check
+      
 
-  # ─────────────────────────────────────────
-  # 3. UNIT TESTS
-  # ─────────────────────────────────────────
+# Unit tests + coverage
   unit-tests:
-    name: Unit Tests
+    name: Unit tests
     runs-on: ubuntu-latest
     needs: setup
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
+      
       - name: Restore node_modules cache
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-
+          key: ${{runner.os}}-node-${{hashFiles('package-lock.json')}}
+      
       - name: Run unit tests with coverage
         run: npm run test:coverage
 
@@ -88,19 +84,15 @@ jobs:
         with:
           name: coverage-report
           path: coverage/
-
       - name: Check coverage threshold
         run: |
-          COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+          COVERAGE=${cat coverage/coverage-summary.json | jq '.total.lines.pct'}
           echo "Coverage: $COVERAGE%"
-          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+          if(($(echo "$COVERAGE < 80" | bc -l))); then
             echo "Coverage $COVERAGE% is below 80% threshold"
             exit 1
           fi
-
-  # ─────────────────────────────────────────
-  # 4. INTEGRATION TESTS
-  # ─────────────────────────────────────────
+# Integration Test
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
@@ -119,25 +111,24 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+      
       - name: Restore node_modules cache
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-
+          key: ${{runner.os}}-node-${{hashFiles('package-lock.json')}}
+      
       - name: Run integration tests
         env:
           DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
         run: npm run test:integration
 
-  # ─────────────────────────────────────────
-  # 5. SECURITY SCANNING
-  # ─────────────────────────────────────────
-  security:
+# Security Scanning
+  securtiy:
     name: Security Scanning
     runs-on: ubuntu-latest
     needs: setup
@@ -145,15 +136,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
+          fetch-depth: 0  #Full history for secret scanning
+      
       - name: Run Trufflehog (secret scanning)
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event.repository.default_branch }}
+          base: ${{github.event.repository.default_branch}}
           head: HEAD
-
+    
+    # Static Application Security Testing
       - name: Run Semgrep (SAST)
         uses: semgrep/semgrep-action@v1
         with:
@@ -162,19 +154,18 @@ jobs:
             p/owasp-top-ten
             p/nodejs
 
+    # Dependency vulnerability scan
       - name: Run npm audit
         run: npm audit --audit-level=high
 
       - name: Run Snyk vulnerability scan
         uses: snyk/actions/node@master
         env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_TOKEN: ${{secrets.SNYK_TOKEN}}
         with:
           args: --severity-threshold=high
 
-  # ─────────────────────────────────────────
-  # 6. SONARCLOUD
-  # ─────────────────────────────────────────
+
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
@@ -183,44 +174,58 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
+          fetch-depth: 0 #shallow clones disabled - sonarcloud needs full history for blame
+      
+      - name: Setup Node.js 
         uses: actions/setup-node@v4
         with:
           node-version: "20"
-
+      
       - name: Restore node_modules cache
         uses: actions/cache@v3
         with:
           path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-
+          key: ${{runner.os}}-node-${{hashFiles('package-lock.json')}}
+      
+    # Download the coverage report generated in the unit-tests job
       - name: Download coverage report
         uses: actions/download-artifact@v4
         with:
           name: coverage-report
           path: coverage/
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+      # sonarcloud scanner analysis
+      # #   - Bugs & code smells
+      #   - Security vulnerabilities (SAST)
+      #   - Code duplication
+      #   - Test coverage (from lcov.info)
+      #   - Technical debt
+      - name: sonarcloud Scan
+        uses: SonarSource/sonarcloud-scan-action@master
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
+          SONAR_HOST_URL: ${{secrets.SONAR_HOST_URL}}
         with:
           args: >
-            -Dsonar.projectKey=StacDeveloper_AI-Website
-            -Dsonar.organization=stacdeveloper
+            -Dsonar.projectKey=my-app
+            -Dsonar.projectName="My App"
             -Dsonar.sources=src
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.test.js,**/*.spec.js
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
             -Dsonar.coverage.exclusions=**/*.test.js,**/*.spec.js,**/node_modules/**
             -Dsonar.cpd.exclusions=**/*.test.js
+    
+    # # Quality Gate - blocks pipeline if sonarcloud score fails
+    # # e.g. coverage dropped, new bugs introduced, security issues found
+    #   - name: sonarcloud Quality Gate Check
+    #     uses: SonarSource/sonarcloud-quality-gate-action@master
+    #     timeout-minutes: 5
+    #     env:
+    #       SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
+    #       SONAR_HOST_URL: ${{secrets.SONAR_HOST_URL}}
 
-  # ─────────────────────────────────────────
-  # 7. BUILD + SCAN DOCKER IMAGE
-  # ─────────────────────────────────────────
+  # Build Docker Image
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
@@ -331,17 +336,14 @@ jobs:
             --repository-name ${{ env.ECR_REPOSITORY }} \
             --image-ids imageDigest={}
 
-  # ─────────────────────────────────────────
-  # 9. DEPLOY TO EKS
-  # ─────────────────────────────────────────
   deploy:
-    name: Deploy to EKS
+    name: Deploy to EKS 
     runs-on: ubuntu-latest
     needs: push-to-ecr
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
     permissions:
       id-token: write
-      contents: read
+      contents: read 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -375,23 +377,31 @@ jobs:
         run: |
           kubectl rollout status deployment/my-app --timeout=120s
 
-  # ─────────────────────────────────────────
-  # 10. NOTIFY ON FAILURE
-  # ─────────────────────────────────────────
+# Notify on failure
   notify:
     name: Notify on Failure
     runs-on: ubuntu-latest
-    needs: [lint, unit-tests, integration-tests, security, build, push-to-ecr, deploy, sonarcloud]
+    needs: [lint, unit-tests, integration-tests, security, build, image-scan, push-to-ecr, sonarcloud]
     if: failure()
     steps:
-      - name: Create GitHub Issue on failure
-        uses: actions/github-script@v7
+      - name: Notify Slack on failure
+        uses: slackapi/slack-github-action@v1.26.0
         with:
-          script: |
-            github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `CI Pipeline Failed - ${context.sha.substring(0, 7)}`,
-              body: `## CI Pipeline Failed\n\n**Repo:** ${context.repo.owner}/${context.repo.repo}\n**Branch:** ${context.ref}\n**Commit:** ${context.sha}\n**Triggered by:** ${context.actor}\n\n[View Run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})`,
-              labels: ['ci-failure']
-            })
+          payload: |
+            {
+              "text": "CI PIPELINE FAILED!",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🚨 *CI PIPELINE FAILED*\n*Repo:* ${{ github.repository }}\n*Branch:* ${{ github.ref_name }}\n*Commit:* ${{ github.sha }}\n*Triggered by:* ${{ github.actor }}\n*<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View Run>*"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{secrets.SLACK_WEBHOOK_URL}}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+  
+       
