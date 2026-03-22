@@ -19,7 +19,7 @@
   "license": "ISC",
   "type": "module",
   "jest": {
-    "tranform": {
+    "transform": {
       "^.+\\.js$": "babel-jest"
     },
     "testEnvironment": "node",
