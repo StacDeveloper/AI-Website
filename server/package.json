@@ -30,7 +30,10 @@
       "**/*.js",
       "!**/node_modules/**",
       "!jest.config.js",
-      "!babel.config.js"
+      "!babel.config.js",
+      "!**/langgraph.js",
+      "!eslint.config.js",
+      "!server.js"
     ]
   },
   "dependencies": {

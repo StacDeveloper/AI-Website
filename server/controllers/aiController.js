@@ -1,11 +1,11 @@
-import { clerkClient } from "@clerk/express";
-import pgsql from "../configs/db.js";
-import openai from "../configs/gemini.js";
-import axios from "axios";
-import { v2 as cloudinary } from "cloudinary";
-import { configDotenv } from "dotenv";
-import fs from "fs";
-import { PDFParse } from "pdf-parse";
+import { clerkClient } from '@clerk/express';
+import pgsql from '../configs/db.js';
+import openai from '../configs/gemini.js';
+import axios from 'axios';
+import { v2 as cloudinary } from 'cloudinary';
+import { configDotenv } from 'dotenv';
+import fs from 'fs';
+import { PDFParse } from 'pdf-parse';
 // import { PromptTemplate } from "@langchain/core/prompts";
 // import { StringOutputParser } from "@langchain/core/output_parsers"
 // import { ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings } from "@langchain/google-genai"
@@ -21,27 +21,25 @@ export const GenerateArticle = async (req, res) => {
     const free_usage = req.free_usage;
 
     if (!prompt || !length) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Need prompt and length to generate article",
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Need prompt and length to generate article',
+      });
     }
 
-    if (!plan !== "premium" && free_usage >= 10) {
+    if (!plan !== 'premium' && free_usage >= 10) {
       return res.json({
         success: false,
         message:
-          "Your have used your credits, Please upgrade to premium plan to continue",
+          'Your have used your credits, Please upgrade to premium plan to continue',
       });
     }
 
     const response = await openai.chat.completions.create({
-      model: "gemini-3-flash-preview",
+      model: 'gemini-3-flash-preview',
       messages: [
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -54,7 +52,7 @@ export const GenerateArticle = async (req, res) => {
     const query =
       await pgsql`INSERT INTO creations (user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${content}, 'article')`;
 
-    if (plan !== "premium") {
+    if (plan !== 'premium') {
       await clerkClient.users.updateUserMetadata(userId, {
         privateMetadata: {
           free_usage: free_usage + 1,
@@ -76,27 +74,25 @@ export const GenerateBlogTitle = async (req, res) => {
     const free_usage = req.free_usage;
 
     if (!prompt) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Need prompt to generate blog-title",
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Need prompt to generate blog-title',
+      });
     }
 
-    if (!plan !== "premium" && free_usage >= 10) {
+    if (!plan !== 'premium' && free_usage >= 10) {
       return res.json({
         success: false,
         message:
-          "Your have used your credits, Please upgrade to premium plan to continue",
+          'Your have used your credits, Please upgrade to premium plan to continue',
       });
     }
 
     const response = await openai.chat.completions.create({
-      model: "gemini-3-flash-preview",
+      model: 'gemini-3-flash-preview',
       messages: [
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],
@@ -109,7 +105,7 @@ export const GenerateBlogTitle = async (req, res) => {
     const query =
       await pgsql`INSERT INTO creations (user_id, prompt, content, type) VALUES (${userId}, ${prompt}, ${content}, 'blog-title')`;
 
-    if (plan !== "premium") {
+    if (plan !== 'premium') {
       await clerkClient.users.updateUserMetadata(userId, {
         privateMetadata: {
           free_usage: free_usage + 1,
@@ -130,31 +126,29 @@ export const GenerateImage = async (req, res) => {
     const plan = req.plan;
 
     if (!prompt) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Need prompt and publish to generate image",
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Need prompt and publish to generate image',
+      });
     }
 
     const formData = new FormData();
-    formData.append("prompt", prompt);
+    formData.append('prompt', prompt);
 
     const apiKey = process.env.CLIPDROP_API_KEY;
 
     if (apiKey) {
       const response = await axios.post(
-        "https://clipdrop-api.co/text-to-image/v1",
+        'https://clipdrop-api.co/text-to-image/v1',
         formData,
         {
           headers: {
-            "x-api-key": apiKey,
+            'x-api-key': apiKey,
           },
-          responseType: "arraybuffer",
-        },
+          responseType: 'arraybuffer',
+        }
       );
-      const base64image = `data:image/png;base64,${Buffer.from(response.data, "binary").toString("base64")}`;
+      const base64image = `data:image/png;base64,${Buffer.from(response.data, 'binary').toString('base64')}`;
 
       const { secure_url } = await cloudinary.uploader.upload(base64image);
 
@@ -166,7 +160,7 @@ export const GenerateImage = async (req, res) => {
     if (!apiKey) {
       return res
         .status(500)
-        .json({ success: false, message: "Missing API key" });
+        .json({ success: false, message: 'Missing API key' });
     }
   } catch (error) {
     console.log(error);
@@ -183,14 +177,14 @@ export const RemoveImageBackground = async (req, res) => {
     if (!image) {
       return res
         .status(400)
-        .json({ success: false, message: "Need image to generate background" });
+        .json({ success: false, message: 'Need image to generate background' });
     }
 
     const { secure_url } = await cloudinary.uploader.upload(image.path, {
       transformation: [
         {
-          effect: "background_removal",
-          background_removal: "remove_the_background",
+          effect: 'background_removal',
+          background_removal: 'remove_the_background',
         },
       ],
     });
@@ -213,19 +207,17 @@ export const RemoveImageObject = async (req, res) => {
     console.log(object);
 
     if (!image || !object) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Please upload 1 image and specify the object",
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Please upload 1 image and specify the object',
+      });
     }
 
     const { public_id } = await cloudinary.uploader.upload(image.path);
 
     const image_url = cloudinary.url(public_id, {
       transformation: [{ effect: `gen_remove:${object}` }],
-      resource_type: "image",
+      resource_type: 'image',
     });
 
     const insert = `Remove ${object} from image`;
@@ -248,13 +240,13 @@ export const ResumeReview = async (req, res) => {
     if (!resume) {
       return res
         .status(400)
-        .json({ success: false, message: "Please upload resume to review" });
+        .json({ success: false, message: 'Please upload resume to review' });
     }
 
     if (resume.size > 5 * 1024 * 1024) {
       return res.json({
         success: false,
-        message: "Resume pdf should not be greater than 5mb",
+        message: 'Resume pdf should not be greater than 5mb',
       });
     }
 
@@ -264,10 +256,10 @@ export const ResumeReview = async (req, res) => {
     const prompt = `Review the following resume and provide constructive feedback on its strengths, weaknesses, and areas for improvement. Resume Content:\n\n${pdfData.text}`;
 
     const response = await openai.chat.completions.create({
-      model: "gemini-3-flash-preview",
+      model: 'gemini-3-flash-preview',
       messages: [
         {
-          role: "user",
+          role: 'user',
           content: prompt,
         },
       ],

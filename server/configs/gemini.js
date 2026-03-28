@@ -1,10 +1,10 @@
-import OpenAI from "openai";
-import { configDotenv } from "dotenv";
+import OpenAI from 'openai';
+import { configDotenv } from 'dotenv';
 configDotenv();
 
 const openai = new OpenAI({
   apiKey: process.env.GEMINI_API_KEY,
-  baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
+  baseURL: 'https://generativelanguage.googleapis.com/v1beta/openai/',
 });
 
 export default openai;

@@ -73,10 +73,10 @@ spec:
           lifecycle:
             preStop:
               exec:
-                command: ["bin/sh", "-c", "sleep 15"]
+                command: ['bin/sh', '-c', 'sleep 15']
           env:
-            - name: "TZ"
-              value: "Asia/Shanghai"
+            - name: 'TZ'
+              value: 'Asia/Shanghai'
             - name: PORT
               valueFrom:
                 secretKeyRef:

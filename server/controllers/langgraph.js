@@ -1,22 +1,22 @@
-import { StringOutputParser } from "@langchain/core/output_parsers";
-import { PromptTemplate } from "@langchain/core/prompts";
+import { StringOutputParser } from '@langchain/core/output_parsers';
+import { PromptTemplate } from '@langchain/core/prompts';
 import {
   ChatGoogleGenerativeAI,
   GoogleGenerativeAIEmbeddings,
-} from "@langchain/google-genai";
-import { END, StateGraph } from "@langchain/langgraph";
-import { configDotenv } from "dotenv";
-import pgsql from "../configs/db";
+} from '@langchain/google-genai';
+import { END, StateGraph } from '@langchain/langgraph';
+import { configDotenv } from 'dotenv';
+import pgsql from '../configs/db';
 configDotenv();
 
 const model = new ChatGoogleGenerativeAI({
-  model: "gemini-3-flash-preview",
+  model: 'gemini-3-flash-preview',
   temperature: 0.7,
   apiKey: process.env.GEMINI_API_KEY,
 });
 
 const embedding = new GoogleGenerativeAIEmbeddings({
-  model: "gemini-embedding-001",
+  model: 'gemini-embedding-001',
   temperature: 0.7,
   apiKey: process.env.GEMINI_API_KEY,
 });
@@ -35,7 +35,7 @@ const classifyQuestion = async (state) => {
                     - general         (anything else)
                     Reply with ONLY the category word, nothing else.
                     Question: {question}
-            `,
+            `
     )
       .pipe(model)
       .pipe(parser);
@@ -50,23 +50,23 @@ const fetchContext = async (state) => {
   try {
     let searchQuery;
     switch (state.questionType) {
-      case "skill_check":
+      case 'skill_check':
         searchQuery = state.question;
         break;
-      case "job_fit":
+      case 'job_fit':
         searchQuery = `experience skills ${state.question}`;
         break;
-      case "improvement":
+      case 'improvement':
         searchQuery = `skills experience projects ${state.question}`;
         break;
-      case "salary":
+      case 'salary':
         searchQuery = `experience years skills ${state.question}`;
         break;
-      case "general":
+      case 'general':
         searchQuery = state.question;
         break;
       default:
-        searchQuery = "general";
+        searchQuery = 'general';
         break;
     }
 
@@ -75,14 +75,14 @@ const fetchContext = async (state) => {
       questionVector = questionVector.slice(0, 768);
     }
 
-    const getChunks = ["job_fit", "improvement"];
+    const getChunks = ['job_fit', 'improvement'];
 
     const chunkLimit = getChunks.includes(state.questionType) ? 8 : 4;
     const chunks =
       await pgsql`SELECT content FROM resume_chunks WHERE user_id = ${state.userId} ORDER BY <=> ${JSON.stringify(questionVector)}::vector LIMIT ${chunkLimit}`;
 
     const context =
-      chunks.map((c) => c.content).join("\n\n") || "No Resume Found";
+      chunks.map((c) => c.content).join('\n\n') || 'No Resume Found';
 
     return { ...state, context };
   } catch (error) {
@@ -95,7 +95,7 @@ const answerSkillCheck = async (state, res) => {
     const chain = PromptTemplate.fromTemplate(
       `
              Based on this resume content, answer the skill question clearly. List specific technologies and rate proficiency if possible. Resume: {context} Question: {question}
-            `,
+            `
     )
       .pipe(model)
       .pipe(parser);
@@ -114,7 +114,7 @@ const answerJobFit = async (state) => {
     const chain = PromptTemplate.fromTemplate(
       `
              Based on this resume, assess the candidate's fit for the role. Give a fit score out of 10. List matching skills. List missing skills. Give a clear recommendation.Resume: {context} Question: {question}
-            `,
+            `
     )
       .pipe(model)
       .pipe(parser);
@@ -130,7 +130,7 @@ const answerImprovement = async (state) => {
   try {
     const chain = PromptTemplate.fromTemplate(
       `Based on this resume, identify specific gaps and improvements. Be direct and actionable. Prioritize the most impactful improvements first. Resume: {context} Question: {question}
-    `,
+    `
     )
       .pipe(model)
       .pipe(parser);
@@ -152,7 +152,7 @@ const answerSalary = async (state) => {
                 
                 Resume: {context}
                 Question: {question}
-            `,
+            `
     )
       .pipe(model)
       .pipe(parser);
@@ -171,7 +171,7 @@ const answerGeneral = async (state) => {
         
         Resume: {context}
         Question: {question}
-    `,
+    `
   )
     .pipe(model)
     .pipe(parser);
@@ -190,32 +190,32 @@ const workFlow = new StateGraph({
   },
 });
 
-workFlow.addNode("classify", classifyQuestion);
-workFlow.addNode("fetchContext", fetchContext);
-workFlow.addNode("skillCheck", answerSkillCheck);
-workFlow.addNode("jobFit", answerJobFit);
-workFlow.addNode("improvemnt", answerImprovement);
-workFlow.addNode("salary", answerSalary);
-workFlow.addNode("general", answerGeneral);
+workFlow.addNode('classify', classifyQuestion);
+workFlow.addNode('fetchContext', fetchContext);
+workFlow.addNode('skillCheck', answerSkillCheck);
+workFlow.addNode('jobFit', answerJobFit);
+workFlow.addNode('improvemnt', answerImprovement);
+workFlow.addNode('salary', answerSalary);
+workFlow.addNode('general', answerGeneral);
 
-workFlow.setEntryPoint("classify");
-workFlow.addEdge("classify", "fetchContext");
+workFlow.setEntryPoint('classify');
+workFlow.addEdge('classify', 'fetchContext');
 
-workFlow.addConditionalEdges("fetchContext", (state) => {
+workFlow.addConditionalEdges('fetchContext', (state) => {
   const routes = {
-    skill_check: "skillCheck",
-    jobfit: "jobFit",
-    improvement: "improvement",
-    salary: "salary",
-    general: "general",
+    skill_check: 'skillCheck',
+    jobfit: 'jobFit',
+    improvement: 'improvement',
+    salary: 'salary',
+    general: 'general',
   };
-  return routes[state.questionType] || "general";
+  return routes[state.questionType] || 'general';
 });
 
-workFlow.addEdge("skillCheck", END);
-workFlow.addEdge("jobFit", END);
-workFlow.addEdge("improvement", END);
-workFlow.addEdge("salary", END);
-workFlow.addEdge("general", END);
+workFlow.addEdge('skillCheck', END);
+workFlow.addEdge('jobFit', END);
+workFlow.addEdge('improvement', END);
+workFlow.addEdge('salary', END);
+workFlow.addEdge('general', END);
 
 const resumeGraph = workFlow.compile();

@@ -1,17 +1,17 @@
-import { clerkClient } from "@clerk/express";
+import { clerkClient } from '@clerk/express';
 
 export const auth = async (req, res, next) => {
   try {
     const { userId, has } = await req.auth();
 
-    const hasPremiumPlan = await has({ plan: "premium" });
+    const hasPremiumPlan = await has({ plan: 'premium' });
 
     const user = await clerkClient.users.getUser(userId);
 
     if (!user) {
       return res
         .status(400)
-        .json({ success: false, message: "User not found" });
+        .json({ success: false, message: 'User not found' });
     }
 
     if (!hasPremiumPlan && user.privateMetadata.free_usage) {
@@ -25,7 +25,7 @@ export const auth = async (req, res, next) => {
       req.free_usage = 0;
     }
 
-    req.plan = hasPremiumPlan ? "premium" : "free";
+    req.plan = hasPremiumPlan ? 'premium' : 'free';
     next();
   } catch (error) {
     console.log(error);

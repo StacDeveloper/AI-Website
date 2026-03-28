@@ -1,4 +1,4 @@
-import pgsql from "../configs/db.js";
+import pgsql from '../configs/db.js';
 
 export const GetUserCreations = async (req, res) => {
   try {
@@ -6,7 +6,7 @@ export const GetUserCreations = async (req, res) => {
     if (!userId) {
       return res
         .status(400)
-        .json({ success: false, message: "User not found" });
+        .json({ success: false, message: 'User not found' });
     }
     const creations =
       await pgsql`SELECT * FROM creations WHERE user_id = ${userId} ORDER BY created_at DESC`;
@@ -38,7 +38,7 @@ export const ToggleLikeCreation = async (req, res) => {
     if (!creation) {
       return res
         .status(400)
-        .json({ success: false, message: "No creation exist with this id" });
+        .json({ success: false, message: 'No creation exist with this id' });
     }
     const currentLikes = creation.likes;
     const userIdStr = userId.toString();
@@ -47,13 +47,13 @@ export const ToggleLikeCreation = async (req, res) => {
 
     if (currentLikes.includes(userIdStr)) {
       updatedLikes = currentLikes.filter((user) => user !== userIdStr);
-      message = "Unliked Creation Successfully";
+      message = 'Unliked Creation Successfully';
     } else {
       updatedLikes = [...currentLikes, userIdStr];
-      message = "Liked Creation Successfully";
+      message = 'Liked Creation Successfully';
     }
 
-    const forMattedArray = `{${updatedLikes.join(",")}}`;
+    const forMattedArray = `{${updatedLikes.join(',')}}`;
     const updatedCreation =
       await pgsql`UPDATE creations SET likes = ${forMattedArray}::text[] WHERE id = ${id};`;
 
