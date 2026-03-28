@@ -137,8 +137,9 @@ export const GenerateImage = async (req, res) => {
 
 
             return res.status(200).json({ success: true, content: secure_url })
-        } else {
-            return res.json({ sucess: false, message: "Api key not provided" })
+        } 
+        if(!apiKey){
+            return res.status(500).json({success:false, message:"Missing API key"})
         }
 
     } catch (error) {

@@ -10,18 +10,16 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "jest",
-    "test:coverage": "jest --coverage",
-    "test:integration": "jest --testPathPattern=integration --coverage"
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "test:coverage": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+    "test:integration": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPattern=integration --coverage"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "jest": {
-    "transform": {
-      "^.+\\.js$": "babel-jest"
-    },
+    "transform": {},
     "testEnvironment": "node",
     "coverageReporters": [
       "lcov",
@@ -53,6 +51,7 @@
     "@eslint/js": "^10.0.1",
     "@jest/globals": "^30.3.0",
     "babel-jest": "^30.3.0",
+    "cross-env": "^10.1.0",
     "eslint": "^10.1.0",
     "globals": "^17.4.0",
     "jest": "^30.3.0",
