@@ -29,11 +29,14 @@
     "collectCoverageFrom": [
       "**/*.js",
       "!**/node_modules/**",
-      "!jest.config.js",
-      "!babel.config.js",
-      "!**/langgraph.js",
       "!eslint.config.js",
-      "!server.js"
+      "!server.js",
+      "!**/langgraph.js",
+      "!configs/db.js",
+      "!configs/gemini.js",
+      "!configs/cloudinary.js",
+      "!configs/model.js",
+      "!babel.config.js"
     ]
   },
   "dependencies": {

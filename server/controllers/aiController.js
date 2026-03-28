@@ -155,6 +155,9 @@ export const GenerateImage = async (req, res) => {
       const query =
         await pgsql`INSERT INTO creations (user_id, prompt, content, type, publish) VALUES (${userId}, ${prompt}, ${secure_url}, 'image', ${publish ?? false})`;
 
+      if (!query) {
+        return res.status(500).json({ success: false, message: "Failed to save creation" })
+      }
       return res.status(200).json({ success: true, content: secure_url });
     }
     if (!apiKey) {
