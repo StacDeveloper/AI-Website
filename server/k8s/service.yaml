@@ -12,7 +12,7 @@ spec:
     clientIP:
       timeoutSeconds: 10800
   ports:
-  - name: server-service
-    protocol: TCP
-    port: 80
-    targetPort: 3000
+    - name: server-service
+      protocol: TCP
+      port: 80
+      targetPort: 3000

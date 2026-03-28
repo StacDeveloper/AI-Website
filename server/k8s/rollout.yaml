@@ -33,9 +33,13 @@ spec:
       labels:
         app: server
     spec:
+      securityContext:
+        runAsNonRoot: true
       terminationGracePeriodSeconds: 60
       containers:
         - name: server
+          securityContext:
+            allowPrivilegeEscalation: false
           image: ai-saas:latest
           imagePullPolicy: Never
           ports:

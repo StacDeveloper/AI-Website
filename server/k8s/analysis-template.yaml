@@ -11,7 +11,7 @@ spec:
       successCondition: result == "true"
       failureLimit: 2
       provider:
-        web: 
+        web:
           url: http://server-stable-svc.server-backend.svc.cluster.local/health
           jsonPath: "{$.status}"
           timeoutSeconds: 10
