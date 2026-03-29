@@ -133,13 +133,11 @@ describe('Integration Test', () => {
       expect(res[0].connected).toBe(1);
     });
     it('should have a creation table', async () => {
-      const res = await request(app)
-        .post('/api/ai/generate-article')
-        .send({
-          prompt: 'Write about integration test',
-          length: 'short',
-          publish: false,
-        });
+      const res = await request(app).post('/api/ai/generate-article').send({
+        prompt: 'Write about integration test',
+        length: 'short',
+        publish: false,
+      });
 
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
@@ -151,13 +149,11 @@ describe('Integration Test', () => {
     });
 
     it('should persist article with publish = true to real db', async () => {
-      const res = await request(app)
-        .post('/api/ai/generate-article')
-        .send({
-          prompt: 'Published article test',
-          length: 'short',
-          publish: true,
-        });
+      const res = await request(app).post('/api/ai/generate-article').send({
+        prompt: 'Published article test',
+        length: 'short',
+        publish: true,
+      });
       await pgsql`SELECT * FROM creations WHERE user_id = ${TEST_USER_ID} AND type = 'article';`;
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
