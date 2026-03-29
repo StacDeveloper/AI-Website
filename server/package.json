@@ -37,6 +37,10 @@
       "!configs/cloudinary.js",
       "!configs/model.js",
       "!babel.config.js"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/coverage/"
     ]
   },
   "dependencies": {
