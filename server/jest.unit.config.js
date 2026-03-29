@@ -3,16 +3,14 @@ export default {
   transform: {},
   testMatch: ['**/server/__tests__/*.test.js'],
   coverageReporters: ['lcov', 'text', 'json-summary'],
-  testPathIgnorePatterns: [
-    "/node_modules/",
-    "/__tests__/integration/"
-  ],
+  testPathIgnorePatterns: ['/node_modules/', '/__tests__/integration/'],
   collectCoverageFrom: [
     '**/*.js',
     '!**/node_modules/**',
     '!eslint.config.js',
     '!server.js',
     '!**/langgraph.js',
+    '!**/__tests__/**',
     '!configs/db.js',
     '!configs/gemini.js',
     '!configs/cloudinary.js',
@@ -20,6 +18,7 @@ export default {
     '!jest.integration.config.js',
     '!configs/model.js',
     '!babel.config.js',
+    '!**/coverage/**',
   ],
   coverageThreshold: {
     global: {
