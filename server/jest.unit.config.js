@@ -1,8 +1,12 @@
 export default {
   testEnvironment: 'node',
   transform: {},
-  testMatch: ['**/__tests__/**/*.test.js'],
+  testMatch: ['"**/__tests__/*.test.js"'],
   coverageReporters: ['lcov', 'text', 'json-summary'],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/__tests__/integration/"
+  ],
   collectCoverageFrom: [
     '**/*.js',
     '!**/node_modules/**',
@@ -12,6 +16,8 @@ export default {
     '!configs/db.js',
     '!configs/gemini.js',
     '!configs/cloudinary.js',
+    '!jest.unit.config.js',
+    '!jest.integration.config.js',
     '!configs/model.js',
     '!babel.config.js',
   ],
