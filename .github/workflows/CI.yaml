@@ -170,6 +170,17 @@ jobs:
             p/owasp-top-ten
             p/nodejs
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: server
+
       # Dependency vulnerability scan
       - name: Run npm audit
         run: npm audit --audit-level=high
