@@ -1,4 +1,4 @@
-# .semgrepignore
 server/coverage/
 **/coverage/
 **/lcov-report/
+server/k8s/sealed-secrets.yaml
