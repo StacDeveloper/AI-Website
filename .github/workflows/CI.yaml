@@ -135,8 +135,9 @@ jobs:
           key: ${{runner.os}}-node-${{hashFiles('server/package-lock.json')}}
 
       - name: Run integration tests
+        working-directory: server
         env:
-          DATABASE_URL: postgresql://testuser:testpass@localhost:5432/testdb
+          DATABASE_URL: ${{secrets.DATABASE_URL}}
         run: npm run test:integration
 
   # Security Scanning

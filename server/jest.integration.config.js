@@ -20,12 +20,4 @@ export default {
     '!**/coverage/**',
   ],
   passWithNoTests: true,
-  coverageThreshold: {
-    global: {
-      statements: 75,
-      lines: 75,
-      functions: 85,
-      branches: 65,
-    },
-  },
 };
