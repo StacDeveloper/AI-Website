@@ -153,9 +153,9 @@ export const GenerateImage = async (req, res) => {
       const { secure_url } = await cloudinary.uploader.upload(base64image);
 
       const query =
-        await pgsql`INSERT INTO creations (user_id, prompt, content, type, publish) VALUES (${userId}, ${prompt}, ${secure_url}, 'image', ${publish ?? false})`;
+        await pgsql`INSERT INTO creations (user_id, prompt, content, type, publish) VALUES (${userId}, ${prompt}, ${secure_url}, 'image', ${publish ?? false});`;
 
-      if (!query || query.length === 0) {
+      if (!query) {
         return res
           .status(500)
           .json({ success: false, message: 'Failed to save creation' });
