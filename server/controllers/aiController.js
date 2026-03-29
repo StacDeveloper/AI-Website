@@ -162,12 +162,12 @@ export const GenerateImage = async (req, res) => {
       }
       return res.status(200).json({ success: true, content: secure_url });
     }
-    if (!apiKey || !query || query.length === 0) {
+    if (!apiKey) {
       return res
         .status(500)
         .json({
           success: false,
-          message: 'Missing API key' || 'Failed to save creation',
+          message: 'Missing API key'
         });
     }
   } catch (error) {
