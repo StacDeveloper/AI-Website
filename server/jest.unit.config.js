@@ -1,7 +1,7 @@
 export default {
   testEnvironment: 'node',
   transform: {},
-  testMatch: ['"**/__tests__/*.test.js"'],
+  testMatch: ['**/server/__tests__/*.test.js'],
   coverageReporters: ['lcov', 'text', 'json-summary'],
   testPathIgnorePatterns: [
     "/node_modules/",
