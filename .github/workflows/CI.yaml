@@ -240,7 +240,7 @@ jobs:
           args: |
             -Dsonar.projectKey=my-app
             -Dsonar.organization=${{secrets.ORGANISATIONNAME}}
-            "-Dsonar.projectName=${{secrets.PROJECT_KEY}}"
+            -Dsonar.projectName=${{secrets.PROJECT_KEY}}
             -Dsonar.sources=src
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.test.js,**/*.spec.js
