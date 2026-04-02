@@ -237,9 +237,10 @@ jobs:
           SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
         with:
           projectBaseDir: server
-          args: >
+          args: |
             -Dsonar.projectKey=my-app
-            -Dsonar.projectName=My App
+            -Dsonar.organization=${{secrets.ORGANISATIONNAME}}
+            "-Dsonar.projectName=${{secrets.PROJECT_KEY}}"
             -Dsonar.sources=src
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.test.js,**/*.spec.js
