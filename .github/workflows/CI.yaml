@@ -346,7 +346,7 @@ jobs:
       - name: Pull cached image and push to ECR
         run: |
           docker pull ${{ needs.build.outputs.image-uri }} || true
-          docker tag ${{needs.build.outputs.image-uri}}\${{steps.login-ecr.outputs.registry}}/${{env.ECR_REPOSITORY}}:latest
+          docker tag ${{needs.build.outputs.image-uri}} ${{steps.login-ecr.outputs.registry}}/${{env.ECR_REPOSITORY}}:latest
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
 
