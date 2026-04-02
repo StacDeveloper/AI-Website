@@ -291,8 +291,8 @@ jobs:
         with:
           context: ./server
           file: ./server/Dockerfile
-          push: false
-          load: true
+          push: true
+          load: false
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.ref_name }}
