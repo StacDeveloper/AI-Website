@@ -239,7 +239,7 @@ jobs:
           projectBaseDir: server
           args: >
             -Dsonar.projectKey=my-app
-            -Dsonar.projectName="My App"
+            -Dsonar.projectName=My App
             -Dsonar.sources=src
             -Dsonar.tests=src
             -Dsonar.test.inclusions=**/*.test.js,**/*.spec.js
