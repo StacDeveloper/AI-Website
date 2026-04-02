@@ -238,9 +238,9 @@ jobs:
         with:
           projectBaseDir: server
           args: |
-            -Dsonar.projectKey=my-app
+            -Dsonar.projectKey=${{secrets.PROJECT_KEY}}
             -Dsonar.organization=${{secrets.ORGANISATIONNAME}}
-            -Dsonar.projectName=${{secrets.PROJECT_KEY}}
+            -Dsonar.projectName=AI-Website
             -Dsonar.sources=.
             -Dsonar.tests=.
             -Dsonar.test.inclusions=**/*.test.js,**/*.spec.js
