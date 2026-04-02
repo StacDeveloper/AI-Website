@@ -30,3 +30,8 @@ k8s/aws-github.yaml
 .github/workflows/cloud.yaml          
 .env
 *.pem
+server/k8s/pub-cert.pem
+server/k8s/argocd
+server/k8s/argocd.pub
+argocd.*
+argocd
