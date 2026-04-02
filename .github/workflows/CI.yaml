@@ -229,7 +229,7 @@ jobs:
       #   - Security vulnerabilities (SAST)
       #   - Code duplication
       #   - Test coverage (from lcov.info)
-      #   - Technical debt
+      #   - Technical debt #
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v3.1.0
         env:
