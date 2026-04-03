@@ -9,6 +9,7 @@ on:
 env:
   AWS_REGION: eu-north-1
   ECR_REPOSITORY: server-backend/ai-website
+  EKS_CLUSTER_NAME: AI-backend
   IMAGE_TAG: ${{github.sha}}
   # EKS_CLUSTER_NAME: server-backend
 
