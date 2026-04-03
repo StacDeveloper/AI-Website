@@ -44,4 +44,12 @@ terraform.tfstate
 terraform.tfstate.backup
 *.tfvars
 terraform/README.md
-
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.tfvars
+terraform.tfstate.1775217833.backup
+terraform.tfstate.1775217846.backup
+terraform.tfstate.1775217887.backup
+*.tfstate
+.tfstate.backup
