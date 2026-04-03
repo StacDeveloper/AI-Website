@@ -13,4 +13,6 @@ WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/ ./
 EXPOSE 3000
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup && chown -R appuser:appgroup /app
+USER appuser
 CMD ["node","server.js"]

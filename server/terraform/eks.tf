@@ -62,3 +62,17 @@ resource "aws_iam_role_policy_attachment" "ecr_pull" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = module.eks.cluster_iam_role_name
 }
+
+# resource "kubectl_manifest" "disable_consolidation" {
+#   yaml_body = <<YAML
+#   apiVersion: karpenter.sh/v1
+#   kind: NodePool
+#   metaData:
+#     name : general-purpose
+#   spec:
+#     disruption:
+#       consolidationPolicy: WhenEmpty
+#       consolidateAfter: Never
+#     YAML
+#     depends_on = [ module.eks ]
+# }
