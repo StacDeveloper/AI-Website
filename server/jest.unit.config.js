@@ -3,7 +3,10 @@ export default {
   transform: {},
   testMatch: ['**/server/__tests__/*.test.js'],
   coverageReporters: ['lcov', 'text', 'json-summary'],
-  testPathIgnorePatterns: ['/node_modules/', '/__tests__/integration/, /terraform/'],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/__tests__/integration/, /terraform/',
+  ],
   collectCoverageFrom: [
     '**/*.js',
     '!**/node_modules/**',
