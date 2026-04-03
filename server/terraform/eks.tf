@@ -57,3 +57,8 @@ resource "aws_eks_access_policy_association" "admin" {
   }
   depends_on = [aws_eks_access_entry.admin]
 }
+
+resource "aws_iam_role_policy_attachment" "ecr_pull" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = module.eks.cluster_iam_role_name
+}

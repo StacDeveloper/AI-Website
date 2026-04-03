@@ -40,7 +40,7 @@ spec:
         - name: server
           securityContext:
             allowPrivilegeEscalation: false
-          image: ai-saas:latest
+          image: 526335608044.dkr.ecr.eu-north-1.amazonaws.com/server-backend/ai-website:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
