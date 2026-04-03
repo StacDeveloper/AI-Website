@@ -374,6 +374,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: push-to-ecr
     if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    defaults:
+      run:
+        working-directory: server
     permissions:
       id-token: write
       contents: read
@@ -398,6 +401,7 @@ jobs:
             --region ${{ env.AWS_REGION }}
 
       - name: Update image in Kubernetes manifests
+        working-directory: ./server
         run: |
           IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
           # Updates the image tag dynamically in your deployment manifest
@@ -407,9 +411,11 @@ jobs:
           ls -la k8s/
 
       - name: Deploy to EKS
+        working-directory: ./server
         run: kubectl apply -f k8s/
 
       - name: Verify deployment
+        working-directory: ./server
         run: |
           kubectl rollout status rollout/my-app --timeout=120s
 
