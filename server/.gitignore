@@ -35,3 +35,13 @@ server/k8s/argocd
 server/k8s/argocd.pub
 argocd.*
 argocd
+node-scaler.yaml
+sealed-secrets-master-key.yaml
+# Terraform
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+terraform/README.md
+

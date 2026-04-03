@@ -18,6 +18,7 @@ export default {
     '!jest.unit.config.js',
     '!jest.integration.config.js',
     '!**/coverage/**',
+    '!terraform',
   ],
   passWithNoTests: true,
 };

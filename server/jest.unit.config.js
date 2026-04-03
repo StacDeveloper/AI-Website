@@ -3,7 +3,7 @@ export default {
   transform: {},
   testMatch: ['**/server/__tests__/*.test.js'],
   coverageReporters: ['lcov', 'text', 'json-summary'],
-  testPathIgnorePatterns: ['/node_modules/', '/__tests__/integration/'],
+  testPathIgnorePatterns: ['/node_modules/', '/__tests__/integration/, /terraform/'],
   collectCoverageFrom: [
     '**/*.js',
     '!**/node_modules/**',
@@ -19,6 +19,7 @@ export default {
     '!configs/model.js',
     '!babel.config.js',
     '!**/coverage/**',
+    '!terraform',
   ],
   coverageThreshold: {
     global: {
