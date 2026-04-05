@@ -4,6 +4,8 @@ metadata:
   name: server-success-rate
   namespace: server-backend
 spec:
+  args:
+    - name: service-name
   metrics:
     - name: success-rate
       interval: 30s
