@@ -344,7 +344,16 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Check if the image tag exits
+        id: check-image
+        run: |
+          aws ecr describe-images \
+            --repository-name ${{ env.ECR_REPOSITORY }} \
+            --image-ids imageTag=${{ env.IMAGE_TAG }} \
+            --region ${{ env.AWS_REGION }} && echo "exists=true" >> $GITHUB_OUTPUT || echo "exists=false" >> $GITHUB_OUTPUT
+
       - name: Pull cached image and push to ECR
+        if: steps.check-image.outputs.exists='false'
         run: |
           docker pull ${{ needs.build.outputs.image-uri }} || true
           docker tag ${{needs.build.outputs.image-uri}} ${{steps.login-ecr.outputs.registry}}/${{env.ECR_REPOSITORY}}:latest
@@ -406,8 +415,8 @@ jobs:
           IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
           # Updates the image tag dynamically in your deployment manifest
           sed -i "s|image:.*|image: $IMAGE|g" k8s/rollout.yaml
-      -  name : Debug folder
-         run: |
+      - name: Debug folder
+        run: |
           ls -la k8s/
 
       - name: Deploy to EKS
@@ -424,7 +433,7 @@ jobs:
         working-directory: ./server
         run: |
           kubectl argo rollouts status server -n server-backend --timeout=120s
-      
+
       - name: Verify Rollout
         working-directory: ./server
         run: |
