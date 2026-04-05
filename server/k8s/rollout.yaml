@@ -28,7 +28,7 @@ spec:
         templates:
           - templateName: server-success-rate
         args:
-          - name: server-name
+          - name: service-name
             value: server-service
   template:
     metadata:
