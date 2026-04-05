@@ -12,6 +12,8 @@ spec:
   replicas: 2
   strategy:
     canary:
+      stableService: server-service
+      canaryService: server-canary-svc
       steps:
         - setWeight: 10
         - pause: { duration: 1m }
@@ -134,4 +136,3 @@ spec:
       #     hostPath:
       #       path: /usr/share/zoneinfo/Asia/Taipei
       # restartPolicy: Always
----
