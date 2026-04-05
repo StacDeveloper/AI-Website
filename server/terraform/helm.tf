@@ -30,3 +30,21 @@ resource "helm_release" "sealed_secrets" {
   create_namespace = false
   depends_on       = [module.eks]
 }
+
+resource "helm_release" "nginx_ingress" {
+  name             = "nginx-ingress"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  namespace        = "ingress-nginx"
+  create_namespace = true
+
+  set {
+    name  = "controller.service.type"
+    value = "NodePort"
+  }
+  set {
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
+    value = "external"
+  }
+  depends_on = [module.eks, helm_release.alb_controller]
+}

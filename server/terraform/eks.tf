@@ -95,3 +95,5 @@ resource "aws_eks_access_policy_association" "github_actions" {
 
   depends_on = [aws_eks_access_entry.github_actions]
 }
+
+
