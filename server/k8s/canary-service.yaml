@@ -5,7 +5,7 @@ metadata:
   name: server-canary-svc
   namespace: server-backend
   labels:
-    app: server 
+    app: server
     role: canary
     environment: production
 spec:
@@ -13,10 +13,8 @@ spec:
     app: server
   type: ClusterIP
   ports:
-  - name: myjob
-    protocol: TCP
-    port: 80
-    targetPort: 3000
+    - name: myjob
+      protocol: TCP
+      port: 80
+      targetPort: 3000
   sessionAffinity: None
-    
-

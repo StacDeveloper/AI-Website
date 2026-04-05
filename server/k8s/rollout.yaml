@@ -28,8 +28,8 @@ spec:
         templates:
           - templateName: server-success-rate
         args:
-          - name: server
-            value: server-backend
+          - name: server-name
+            value: server-service
   template:
     metadata:
       labels:

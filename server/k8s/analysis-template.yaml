@@ -12,6 +12,6 @@ spec:
       failureLimit: 2
       provider:
         web:
-          url: http://server-service.server-backend.svc.cluster.local/health
+          url: http://{{args.service-name}}.server-backend.svc.cluster.local/health
           jsonPath: '{$.status}'
           timeoutSeconds: 10
