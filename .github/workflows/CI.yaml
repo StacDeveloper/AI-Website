@@ -422,7 +422,14 @@ jobs:
 
       - name: Deploy to EKS
         working-directory: ./server
-        run: kubectl apply -f k8s/
+        run: | 
+          kubectl apply -f k8s/namespace.yaml
+          kubectl wait --for=condition=Active namespace/server-backend --timeout=30s
+      
+      - name: Deploy Everything Else
+        working-directory: ./server
+        run: |
+          kubectl apply -f k8s/
 
       - name: Install Argo Rollouts kubectl plugin
         run: |
