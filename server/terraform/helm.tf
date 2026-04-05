@@ -10,7 +10,7 @@ resource "helm_release" "argocd" {
     name  = "server.service.type"
     value = "ClusterIP"
   }
-  depends_on = [module.eks]
+  depends_on = [module.eks, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions]
 }
 
 resource "helm_release" "argo_rollouts" {
@@ -19,7 +19,7 @@ resource "helm_release" "argo_rollouts" {
   chart            = "argo-rollouts"
   namespace        = "argo-rollouts"
   create_namespace = true
-  depends_on       = [module.eks]
+  depends_on       = [module.eks, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions]
 }
 
 resource "helm_release" "sealed_secrets" {
@@ -28,7 +28,7 @@ resource "helm_release" "sealed_secrets" {
   chart            = "sealed-secrets"
   namespace        = "kube-system"
   create_namespace = false
-  depends_on       = [module.eks]
+  depends_on       = [module.eks, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions]
 }
 
 resource "helm_release" "nginx_ingress" {
