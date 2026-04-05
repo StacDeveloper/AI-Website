@@ -8,7 +8,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: server
+      app: server-service
   replicas: 2
   strategy:
     canary:
