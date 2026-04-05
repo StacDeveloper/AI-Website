@@ -15,5 +15,5 @@ spec:
       provider:
         web:
           url: http://{{args.service-name}}.server-backend.svc.cluster.local/health
-          jsonPath: '{$.status}'
+          jsonPath: '{$.success}'
           timeoutSeconds: 10
