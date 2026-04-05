@@ -3,9 +3,13 @@ kind: Service
 metadata:
   name: server-service
   namespace: server-backend
+  labels:
+    app: server
+    role: stable
+    environment: production
 spec:
   selector:
-    app: server-service
+    app: server
   type: ClusterIP
   sessionAffinity: None
   sessionAffinityConfig:
