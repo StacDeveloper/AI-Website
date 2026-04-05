@@ -417,7 +417,12 @@ jobs:
       - name: Verify deployment
         working-directory: ./server
         run: |
-          kubectl rollout status rollout/my-app --timeout=120s
+          kubectl rollout status rollout/server -n server-backend --timeout=120s
+      
+      - name: Verify Rollout
+        working-directory: ./server
+        run: |
+          kubectl get rollouts -n server-backend
 
   # Notify on failure
   notify:

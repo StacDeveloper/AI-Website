@@ -25,11 +25,12 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
 
-  cluster_name                   = var.cluster_name
-  cluster_version                = var.cluster_version
-  cluster_endpoint_public_access = true
-  vpc_id                         = module.vpc.vpc_id
-  subnet_ids                     = module.vpc.private_subnets
+  cluster_name                             = var.cluster_name
+  cluster_version                          = var.cluster_version
+  cluster_endpoint_public_access           = true
+  vpc_id                                   = module.vpc.vpc_id
+  enable_cluster_creator_admin_permissions = true
+  subnet_ids                               = module.vpc.private_subnets
 
   cluster_compute_config = {
     enabled    = true
@@ -76,3 +77,21 @@ resource "aws_iam_role_policy_attachment" "ecr_pull" {
 #     YAML
 #     depends_on = [ module.eks ]
 # }
+
+resource "aws_eks_access_entry" "github_actions" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = "arn:aws:iam::526335608044:role/Githubcdcd"
+  type          = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "github_actions" {
+  cluster_name  = module.eks.cluster_name
+  principal_arn = "arn:aws:iam::526335608044:role/Githubcdcd"
+  policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+
+  access_scope {
+    type = "cluster"
+  }
+
+  depends_on = [aws_eks_access_entry.github_actions]
+}
