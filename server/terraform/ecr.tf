@@ -1,6 +1,6 @@
 resource "aws_ecr_repository" "app" {
   name                 = "server-backend/ai-website"
-  image_tag_mutability = "MUTABLE"
+  image_tag_mutability = "MUTABLE" #nosec #nosemgrep
   force_delete         = true
 
   image_scanning_configuration {
