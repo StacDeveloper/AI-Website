@@ -364,6 +364,7 @@ jobs:
         uses: sigstore/cosign-installer@v3
 
       - name: Sign Docker Image
+        if: steps.check-image.outputs.exists == 'false'
         run: |
           cosign sign --yes \
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
