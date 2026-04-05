@@ -10,7 +10,7 @@ spec:
     - name: success-rate
       interval: 30s
       count: 3
-      successCondition: result == "true"
+      successCondition: result == true
       failureLimit: 2
       provider:
         web:

@@ -32,8 +32,8 @@ resource "helm_release" "alb_controller" {
     value = local.cluster_name
   }
 
-  set{
-    name = "region"
+  set {
+    name  = "region"
     value = var.region
   }
 
@@ -43,11 +43,16 @@ resource "helm_release" "alb_controller" {
   }
   set {
     name  = "serviceAccount.name"
-    value = var.region
+    value = "aws-load-balancer-controller"
   }
   set {
     name  = "vpcId"
     value = module.vpc.vpc_id
+  }
+
+  set {
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = module.alb_controller_irsa.iam_role_arn
   }
   depends_on = [
     module.eks,
