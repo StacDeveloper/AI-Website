@@ -296,8 +296,6 @@ jobs:
           load: false
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.ref_name }}
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -358,7 +356,7 @@ jobs:
           docker pull ${{ needs.build.outputs.image-uri }} || true
           docker tag ${{needs.build.outputs.image-uri}} ${{steps.login-ecr.outputs.registry}}/${{env.ECR_REPOSITORY}}:latest
           docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+          
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3
