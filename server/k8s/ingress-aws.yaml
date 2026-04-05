@@ -1,19 +1,17 @@
-# https://kubernetes.io/docs/concepts/services-networking/ingress/
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: alb-ingress
   namespace: ingress-nginx
   annotations:
-    kubernetes.io/ingress.class: alb 
+    kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip 
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80}]'
-    alb.ingress.kubenetes.io/healthcheck-paths: /healthz
-
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/healthcheck-path: /healthz
 spec:
   ingressClassName: alb
-    rules:
+  rules:
     - http:
         paths:
           - path: /
@@ -23,4 +21,3 @@ spec:
                 name: ingress-nginx-controller
                 port:
                   number: 80
-
