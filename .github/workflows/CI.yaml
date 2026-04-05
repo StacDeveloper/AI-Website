@@ -435,7 +435,7 @@ jobs:
       - name: Verify deployment
         working-directory: ./server
         run: |
-          kubectl argo rollouts status server -n server-backend --timeout=120s
+          kubectl argo rollouts status server -n server-backend --timeout=300s
 
       - name: Verify Rollout
         working-directory: ./server

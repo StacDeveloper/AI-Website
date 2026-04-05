@@ -48,3 +48,5 @@ resource "helm_release" "nginx_ingress" {
   }
   depends_on = [module.eks, helm_release.alb_controller]
 }
+
+

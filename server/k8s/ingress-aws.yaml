@@ -18,6 +18,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: ingress-nginx-controller
+                name: nginx-ingress-ingress-nginx-controller
                 port:
                   number: 80
