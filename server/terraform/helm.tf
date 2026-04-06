@@ -49,4 +49,61 @@ resource "helm_release" "nginx_ingress" {
   depends_on = [module.eks, helm_release.alb_controller]
 }
 
+resource "helm_release" "metrics_server" {
+  name       = "metrics-server"
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart      = "metrics-server"
+  namespace  = "kube-system"
+
+  set {
+    name  = "args[0]"
+    value = "--kubelet-insecure-tls"
+  }
+  depends_on = [module.eks, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions]
+}
+
+resource "helm_release" "prometheus" {
+  name             = "prometheus"
+  repository       = "https://prometheus-community.github.io/helm-charts"
+  chart            = "kube-prometheus-stack"
+  namespace        = "monitoring"
+  create_namespace = true
+  version          = "67.9.0"
+
+  values = [file("${path.module}/prometheus-values.yaml")]
+
+  set {
+    name  = "grafana.enabled"
+    value = "true"
+  }
+  set {
+    name  = "grafana.service.type"
+    value = "ClusterIP"
+  }
+  set {
+    name  = "prometheus.service.type"
+    value = "ClusterIP"
+  }
+  set {
+    name  = "alertmanager.enabled"
+    value = "true"
+  }
+  set {
+    name  = "grafana.persistence.size"
+    value = "5Gi"
+  }
+  set {
+    name  = "prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues"
+    value = "false"
+  }
+  set {
+    name  = "prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues"
+    value = "false"
+  }
+  set {
+    name  = "prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues"
+    value = "false"
+  }
+  depends_on = [module.eks, helm_release.metrics_server, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions]
+}
 

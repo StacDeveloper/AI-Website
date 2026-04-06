@@ -55,3 +55,10 @@ terraform.tfstate.1775217887.backup
 .tfstate.backup
 alb-iam-policy.json
 .terraform.tfstate.lock.info
+*.tfstate
+*.tfstate.backup
+.terraform/
+*.tfstate.lock.info
+.terraform.tfstate.lock.info
+terraform.tfstate.**
+prometheus-values.yaml
