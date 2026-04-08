@@ -42,7 +42,7 @@ spec:
         - name: server
           securityContext:
             allowPrivilegeEscalation: false
-          image: 526335608044.dkr.ecr.eu-north-1.amazonaws.com/server-backend/ai-website:fddad45273228723d815603ae8f443474b4c133a
+          image: 526335608044.dkr.ecr.eu-north-1.amazonaws.com/server-backend/ai-website:d3b19f788fca9d72ba31fcb73944668dcb048230
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
