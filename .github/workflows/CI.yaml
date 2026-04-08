@@ -402,17 +402,17 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # - name: Update Image tag in rollout.yaml
-      #   run: |
-      #     IMAGE=${{steps.login-ecr.outputs.registry}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}
-      #     sed -i "s|image:.|image: $IMAGE|g" k8s/rollout.yaml
-      #     git config user.email "github-actions@github.com"
-      #     git config user.name "Github Actions"
-      #     git config pull.rebase true
-      #     git pull origin master --rebase
-      #     git add k8s/
-      #     git commit -m "chore: update image tag to ${{ env.IMAGE_TAG }}" || echo "No changes to commit"
-      #     git push
+      - name: Update Image tag in rollout.yaml
+        run: |
+          IMAGE=${{steps.login-ecr.outputs.registry}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}
+          sed -i "s|image:.|image: $IMAGE|g" k8s/rollout.yaml
+          git config user.email "github-actions@github.com"
+          git config user.name "Github Actions"
+          git config pull.rebase true
+          git pull origin master --rebase
+          git add k8s/
+          git commit -m "chore: update image tag to ${{ env.IMAGE_TAG }}" || echo "No changes to commit"
+          git push
 
       - name: Update kubeconfig
         run: |
