@@ -409,7 +409,10 @@ jobs:
           git config user.email "github-actions@github.com"
           git config user.name "Github Actions"
           git config pull.rebase true
+          git add k8s/
+          git stash
           git pull origin master --rebase
+          git stash pop
           git add k8s/
           git commit -m "chore: update image tag to ${{ env.IMAGE_TAG }}" || echo "No changes to commit"
           git push
