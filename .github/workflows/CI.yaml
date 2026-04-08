@@ -405,7 +405,7 @@ jobs:
       - name: Update Image tag in rollout.yaml
         run: |
           IMAGE=${{steps.login-ecr.outputs.registry}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}
-          sed -i "s|image:.|image: $IMAGE|g" k8s/rollout.yaml
+          sed -i "s|image:.*|image: $IMAGE|g" k8s/rollout.yaml
           git config user.email "github-actions@github.com"
           git config user.name "Github Actions"
           git config pull.rebase true
