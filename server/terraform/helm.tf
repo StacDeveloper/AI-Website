@@ -10,7 +10,7 @@ resource "helm_release" "argocd" {
     name  = "server.service.type"
     value = "ClusterIP"
   }
-  depends_on = [module.eks, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions]
+  depends_on = [module.eks, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions, helm_release.alb_controller]
 }
 
 resource "helm_release" "argo_rollouts" {
@@ -19,7 +19,7 @@ resource "helm_release" "argo_rollouts" {
   chart            = "argo-rollouts"
   namespace        = "argo-rollouts"
   create_namespace = true
-  depends_on       = [module.eks, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions]
+  depends_on       = [module.eks, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions, helm_release.alb_controller]
 }
 
 resource "helm_release" "sealed_secrets" {
@@ -28,7 +28,7 @@ resource "helm_release" "sealed_secrets" {
   chart            = "sealed-secrets"
   namespace        = "kube-system"
   create_namespace = false
-  depends_on       = [module.eks, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions]
+  depends_on       = [module.eks, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions, helm_release.alb_controller]
 }
 
 resource "helm_release" "nginx_ingress" {
@@ -97,13 +97,9 @@ resource "helm_release" "prometheus" {
     value = "false"
   }
   set {
-    name  = "prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues"
-    value = "false"
-  }
-  set {
     name  = "prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues"
     value = "false"
   }
-  depends_on = [module.eks, helm_release.metrics_server, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions]
+  depends_on = [module.eks, helm_release.metrics_server, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions, helm_release.alb_controller]
 }
 
