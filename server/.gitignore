@@ -62,3 +62,4 @@ alb-iam-policy.json
 .terraform.tfstate.lock.info
 terraform.tfstate.**
 prometheus-values.yaml
+sealed-alertmanager.yaml
