@@ -63,3 +63,4 @@ alb-iam-policy.json
 terraform.tfstate.**
 prometheus-values.yaml
 sealed-alertmanager.yaml
+alertmanager-slack-sealed.yaml

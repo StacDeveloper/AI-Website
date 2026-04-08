@@ -101,6 +101,15 @@ resource "helm_release" "prometheus" {
     name  = "prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues"
     value = "false"
   }
-  depends_on = [module.eks, helm_release.metrics_server, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions, helm_release.alb_controller]
+  depends_on = [module.eks, helm_release.metrics_server, aws_eks_access_entry.admin, aws_eks_access_entry.github_actions, helm_release.alb_controller, null_resource.alertmanager_slack_secret]
 }
 
+resource "null_resource" "alertmanager_slack_secret" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${path.module}/alertmanager-slack-sealed.yaml"
+  }
+  triggers = {
+    sealed_secrets_hash = filesha256("${path.module}/alertmanager-slack-sealed.yaml")
+  }
+  depends_on = [ helm_release.sealed_secrets ]
+}
