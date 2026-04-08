@@ -459,8 +459,8 @@ jobs:
       #     kubectl get rollouts -n server-backend
       - name: Wait for ArgoCD sync
         run: |
-           kubectl wait --for=condition=Synced application/server-app -n argocd --timeout=120s
-           kubectl wait --for=condition=Healthy application/server-app -n argocd --timeout=120s
+           kubectl wait --for=condition=Synced application/server-app -n argocd --timeout=300s
+           kubectl wait --for=condition=Healthy application/server-app -n argocd --timeout=300s
 
   # Notify on failure
   notify:
