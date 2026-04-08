@@ -1,8 +1,4 @@
-resource "aws_acm_certificate" "cloudfront" {
-  provider          = aws.us-east-1
-  domain_name       = ".cloudfront.net"
-  validation_method = "DNS"
-}
+
 
 resource "aws_cloudfront_distribution" "app" {
   enabled             = true
@@ -11,7 +7,7 @@ resource "aws_cloudfront_distribution" "app" {
 
   origin {
     domain_name = data.aws_lb.app.dns_name
-    origin_id   = "alb_origin"
+    origin_id   = "alb-origin"
 
     custom_origin_config {
       http_port              = 80
@@ -44,6 +40,7 @@ resource "aws_cloudfront_distribution" "app" {
   }
   viewer_certificate {
     cloudfront_default_certificate = true
+    minimum_protocol_version = "TLSv1.2_2021"
   }
   tags = {
     Environment = "learning"
