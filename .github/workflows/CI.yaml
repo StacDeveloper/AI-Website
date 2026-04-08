@@ -402,17 +402,17 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Update Image tag in rollout.yaml
-        run: |
-          IMAGE=${{steps.login-ecr.outputs.registry}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}
-          sed -i "s|image:.*|image: $IMAGE|g" k8s/rollout.yaml
-          git config user.email "github-actions@github.com"
-          git config user.name "Github Actions"
-          git config pull.rebase true
-          git pull origin master --rebase
-          git add k8s/
-          git commit -m "chore: update image tag to ${{ env.IMAGE_TAG }}" || echo "No changes to commit"
-          git push
+      # - name: Update Image tag in rollout.yaml
+      #   run: |
+      #     IMAGE=${{steps.login-ecr.outputs.registry}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}
+      #     sed -i "s|image:.|image: $IMAGE|g" k8s/rollout.yaml
+      #     git config user.email "github-actions@github.com"
+      #     git config user.name "Github Actions"
+      #     git config pull.rebase true
+      #     git pull origin master --rebase
+      #     git add k8s/
+      #     git commit -m "chore: update image tag to ${{ env.IMAGE_TAG }}" || echo "No changes to commit"
+      #     git push
 
       - name: Update kubeconfig
         run: |
@@ -420,40 +420,40 @@ jobs:
             --name ${{ env.EKS_CLUSTER_NAME }} \
             --region ${{ env.AWS_REGION }}
 
-      # - name: Update image in Kubernetes manifests
-      #   working-directory: ./server
-      #   run: |
-      #     IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-      #     # Updates the image tag dynamically in your deployment manifest
-      #     sed -i "s|image:.*|image: $IMAGE|g" k8s/rollout.yaml
+      - name: Update image in Kubernetes manifests
+        working-directory: ./server
+        run: |
+          IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          # Updates the image tag dynamically in your deployment manifest
+          sed -i "s|image:.*|image: $IMAGE|g" k8s/rollout.yaml
 
-      # - name: Debug folder
-      #   run: |
-      #     ls -la k8s/
+      - name: Debug folder
+        run: |
+          ls -la k8s/
 
-      # - name: Deploy to EKS
-      #   working-directory: ./server
-      #   run: | 
-      #     kubectl apply -f k8s/namespace.yaml
-      #     sleep 5
-      #     kubectl apply -f k8s/
+      - name: Deploy to EKS
+        working-directory: ./server
+        run: | 
+          kubectl apply -f k8s/namespace.yaml
+          sleep 5
+          kubectl apply -f k8s/
       
 
-      # - name: Install Argo Rollouts kubectl plugin
-      #   run: |
-      #     curl -LO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
-      #     chmod +x kubectl-argo-rollouts-linux-amd64
-      #     sudo mv kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
+      - name: Install Argo Rollouts kubectl plugin
+        run: |
+          curl -LO https://github.com/argoproj/argo-rollouts/releases/latest/download/kubectl-argo-rollouts-linux-amd64
+          chmod +x kubectl-argo-rollouts-linux-amd64
+          sudo mv kubectl-argo-rollouts-linux-amd64 /usr/local/bin/kubectl-argo-rollouts
 
-      # - name: Verify deployment
-      #   working-directory: ./server
-      #   run: |
-      #     kubectl argo rollouts status server -n server-backend --timeout=300s
+      - name: Verify deployment
+        working-directory: ./server
+        run: |
+          kubectl argo rollouts status server -n server-backend --timeout=300s
 
-      # - name: Verify Rollout
-      #   working-directory: server
-      #   run: |
-      #     kubectl get rollouts -n server-backend
+      - name: Verify Rollout
+        working-directory: ./server
+        run: |
+          kubectl get rollouts -n server-backend
       - name: Wait for ArgoCD sync
         run: |
            kubectl wait --for=condition=Synced application/server-app -n argocd --timeout=120s
