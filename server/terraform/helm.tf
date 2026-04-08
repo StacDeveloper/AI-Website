@@ -69,6 +69,7 @@ resource "helm_release" "prometheus" {
   namespace        = "monitoring"
   create_namespace = true
   version          = "67.9.0"
+  timeout          = 600
 
   values = [file("${path.module}/prometheus-values.yaml")]
 
