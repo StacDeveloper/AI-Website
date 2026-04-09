@@ -65,4 +65,4 @@ prometheus-values.yaml
 sealed-alertmanager.yaml
 alertmanager-slack-sealed.yaml
 secret.yaml
-network-policy.yaml
+
