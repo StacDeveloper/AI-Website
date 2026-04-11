@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: server-success-rate
+  namespace: {{ .Values.namespace }}
+spec:
+  args:
+    - name: service-name
+  metrics:
+    - name: success-rate
+      interval: 30s
+      count: 3
+      successCondition: result == true
+      failureLimit: 2
+      provider:
+        web:
+          url: "http://{{"{{"}}args.service-name{{"}}"}}.{{ .Values.namespace }}.svc.cluster.local/health"
+          jsonPath: '{$.success}'
+          timeoutSeconds: 10

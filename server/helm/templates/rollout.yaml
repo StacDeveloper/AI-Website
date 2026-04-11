@@ -1,0 +1,124 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: server
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: server
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: server
+  strategy:
+    canary:
+      stableService: {{ .Values.service.name }}
+      canaryService: {{ .Values.canaryService.name }}
+      steps:
+        {{- range .Values.canary.steps }}
+        {{- if .setWeight }}
+        - setWeight: {{ .setWeight }}
+        {{- end }}
+        {{- if .pause }}
+        - pause: { duration: {{ .pause }} }
+        {{- end }}
+        {{- end }}
+      analysis:
+        startingStep: {{ .Values.analysis.startingStep }}
+        templates:
+          - templateName: server-success-rate
+        args:
+          - name: service-name
+            value: {{ .Values.analysis.serviceName }}
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: server
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+          ports:
+            - containerPort: {{ .Values.service.targetPort }}
+              name: http
+          resources:
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.probes.liveness.path }}
+              port: {{ .Values.service.targetPort }}
+            initialDelaySeconds: {{ .Values.probes.liveness.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+            periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.probes.readiness.path }}
+              port: {{ .Values.service.targetPort }}
+            initialDelaySeconds: {{ .Values.probes.readiness.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+            failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+            periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+          lifecycle:
+            preStop:
+              exec:
+                command: ['/bin/sh', '-c', 'sleep 15']
+          env:
+            - name: TZ
+              value: {{ .Values.env.TZ }}
+            - name: PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: PORT
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: DATABASE_URL
+            - name: CLERK_PUBLISHABLE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: CLERK_PUBLISHABLE_KEY
+            - name: CLERK_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: CLERK_SECRET_KEY
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: GEMINI_API_KEY
+            - name: CLIPDROP_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: CLIPDROP_API_KEY
+            - name: CLOUDINARY_CLOUD_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: CLOUDINARY_CLOUD_NAME
+            - name: CLOUDINARY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: CLOUDINARY_API_KEY
+            - name: CLOUDINARY_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName }}
+                  key: CLOUDINARY_API_SECRET

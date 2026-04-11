@@ -1,0 +1,67 @@
+replicaCount: 2
+
+image:
+  repository: 526335608044.dkr.ecr.eu-north-1.amazonaws.com/server-backend/ai-website
+  tag: latest
+  pullPolicy: Always
+
+namespace: server-backend
+
+service:
+  name: server-service
+  port: 80
+  targetPort: 3000
+
+canaryService:
+  name: server-service-svc
+
+ingress:
+  enabled: true
+  className: nginx
+  host: ""
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 252Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+hpa:
+  minReplicas: 2
+  maxReplicas: 8
+  cpuUtilization: 50
+  memoryUtilization: 70
+
+canary:
+  steps:
+    - setWeight: 10
+    - pause: 1m
+    - setWeight: 30
+    - pause: 1m
+    - setWeight: 60
+    - pause: 1m
+
+analysis:
+  startingStep: 2
+  serviceName: server-service
+
+probes:
+  liveness:
+    path: /health
+    initialDelaySeconds: 30
+    timeoutSeconds: 10
+    failureThreshold: 3
+    periodSeconds: 10
+  readiness:
+    path: /health
+    initialDelaySeconds: 5
+    timeoutSeconds: 2
+    failureThreshold: 3
+    periodSeconds: 10
+
+env:
+  TZ: Asia/Shanghai
+
+secretName: server-secret   
