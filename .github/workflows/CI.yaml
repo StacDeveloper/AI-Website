@@ -402,6 +402,11 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Validate Helm Chart
+        run: |
+          helm lint server/helm
+          helm template server server-helm --dry-run=client
+          
       - name: Update Image tag in rollout.yaml
         run: |
           IMAGE=${{steps.login-ecr.outputs.registry}}/${{env.ECR_REPOSITORY}}:${{env.IMAGE_TAG}}
